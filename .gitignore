@@ -197,6 +197,7 @@ FakesAssemblies/
 
 actress/
 AVManager/
-db/
+/db/
 dbBackup/
 checkVideoImg.py
+!/server/bin/
