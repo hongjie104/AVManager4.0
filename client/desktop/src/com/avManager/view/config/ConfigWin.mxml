@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009"
+			   xmlns:s="library://ns.adobe.com/flex/spark"
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   width="400" height="300" close="onCloseHandler(event)" title="设置" creationComplete="onTitlewindowCreationCompleted(event)">
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.serialization.json.JSONDecoder;
+			import com.adobe.serialization.json.JSONEncoder;
+			
+			import mx.controls.Text;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			
+			import com.avManager.model.Config;
+			import org.libra.flex.utils.PopUpUtil;
+			
+			private var configObj:Object = new JSONDecoder(new JSONEncoder(Config.instance).getString()).getValue();
+			
+			private function onCloseHandler(event:CloseEvent = null):void {
+				PopUpUtil.instance.removePopUp(this, 1);
+			}
+			
+			protected function onTitlewindowCreationCompleted(event:FlexEvent):void
+			{
+				var configRow:ConfigRow = null;
+				for (var key:String in configObj) {
+					configRow = new ConfigRow();
+					configRow.id = key;
+					configRow.keyLabelStr = key;
+					configRow.valLabelStr = configObj[key].toString();
+					_container.addElement(configRow);
+				}
+			}
+			
+			protected function onOK(event:MouseEvent):void
+			{
+				var configRow:ConfigRow = null;
+				for(var i:int = 0; i < _container.numElements; i++) {
+					configRow = _container.getElementAt(i) as ConfigRow;
+					if(configRow) {
+						Config.instance[configRow.keyLabelStr] = configRow.valLabelStr;
+					}
+				}
+				onCloseHandler();				
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	<s:VGroup width="100%" height="100%">
+		<s:VGroup id="_container" width="100%" height="100%"/>
+		<s:HGroup width="100%" height="36" horizontalAlign="center" verticalAlign="middle">
+			<s:Button label="确定" click="onOK(event)"/>
+		</s:HGroup>
+	</s:VGroup>
+</s:TitleWindow>

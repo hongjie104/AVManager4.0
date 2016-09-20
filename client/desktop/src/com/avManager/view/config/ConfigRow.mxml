@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:HGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		  xmlns:s="library://ns.adobe.com/flex/spark" 
+		  xmlns:mx="library://ns.adobe.com/flex/mx" width="100%" height="26" verticalAlign="middle">
+	<fx:Script>
+		<![CDATA[
+			import spark.events.TextOperationEvent;
+			
+			private var _keyLabelStr:String;
+			
+			private var _valLabelStr:String;
+			
+			[Bindable]
+			public function get keyLabelStr():String
+			{
+				return _keyLabelStr;
+			}
+
+			public function set keyLabelStr(value:String):void
+			{
+				_keyLabelStr = value;
+			}
+	
+			[Bindable]
+			public function get valLabelStr():String
+			{
+				return _valLabelStr;
+			}
+
+			public function set valLabelStr(value:String):void
+			{
+				_valLabelStr = value;
+			}
+
+			protected function onValChanged(event:TextOperationEvent):void
+			{
+				valLabelStr = (event.target as TextInput).text;
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	<s:Label width="100" fontFamily="Arial" fontSize="15" text="{this.keyLabelStr}"
+			 verticalAlign="middle"/>
+	<s:TextInput text="{this.valLabelStr}" width="100%" change="onValChanged(event)"/>
+</s:HGroup>

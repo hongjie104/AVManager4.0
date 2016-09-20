@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:VGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		  xmlns:s="library://ns.adobe.com/flex/spark" 
+		  xmlns:mx="library://ns.adobe.com/flex/mx" width="147" height="233">
+	
+	<fx:Script>
+		<![CDATA[
+			import com.avManager.model.data.Video;
+			import org.libra.utils.DateUtil;
+			
+			private var _video:com.avManager.model.data.Video;
+			
+			public function get video():com.avManager.model.data.Video
+			{
+				return _video;
+			}
+
+			public function set video(value:com.avManager.model.data.Video):void
+			{
+				_video = value;
+				if(value) {
+					_infoLabel.text = value.code + " / " + DateUtil.toString(value.date);
+				}
+			}
+			
+			protected function onClicked(event:MouseEvent):void
+			{
+				
+			}
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	<s:Image id="_img" source="@Embed('assets/defaultVideoCoverSmall.jpg')" click="onClicked(event)"/>
+	<s:Label id="_infoLabel" width="100%" height="26" color="#CC0000" textAlign="center"
+			 verticalAlign="middle"/>
+</s:VGroup>

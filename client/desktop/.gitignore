@@ -1,2 +1,3 @@
 .settings/
 bin-debug/
+!/src/com/avManager/

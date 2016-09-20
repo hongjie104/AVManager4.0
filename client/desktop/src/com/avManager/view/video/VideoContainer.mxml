@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:VGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		  xmlns:s="library://ns.adobe.com/flex/spark" 
+		  xmlns:mx="library://ns.adobe.com/flex/mx" width="100%" height="100%" xmlns:video="com.avManager.view.video.*" addedToStage="onAddedToStage(event)" creationComplete="onCreationCompleted(event)">
+	<fx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+			
+			import com.avManager.API;
+			import com.avManager.Net;
+			import com.avManager.model.data.Video;
+			
+			// 一页的数量
+			private static const _COUNT:int = 27;
+			
+			private static var _totalCount:int = 0;
+			
+			private static var _lastVideoID:String = "000000000000000000000000";
+			
+			private static var _firstVideoID:String = "000000000000000000000000";
+			
+			[Bindable]
+			private var _totalPage:int = 0;
+			
+			[Bindable]
+			private var _curPage:int = 1;
+			
+			protected function onAddedToStage(event:Event):void
+			{
+				this.fetchVideo();
+			}
+			
+			private function fetchVideo(next:Boolean = true):void{
+				var code:String = _codeInput.text;
+				if(code != "") {
+					Net.instance.fetch(API.getVideoByCode(code, _COUNT, next ? _lastVideoID : _firstVideoID, next), this.onFetchVideo);
+				} else {
+					Net.instance.fetch(API.getVideo(_COUNT, next ? _lastVideoID : _firstVideoID, next), onFetchVideo);
+				}
+			}
+			
+			private function onFetchVideo(data:Object):void{
+				_totalCount = data.count;
+				_totalPage = Math.ceil(_totalCount / _COUNT);
+				
+				var l:int = data.video.length;
+				if(l > 0){
+					_firstVideoID = data.video[0]._id;
+					_lastVideoID = data.video[l - 1]._id;	
+				}
+				
+				for(var i:int = 0; i < l; i++) {
+					var v:com.avManager.model.data.Video = new com.avManager.model.data.Video();
+					v.createWithJson(data.video[i]);
+					this.renderVideoDetail(v, i);
+				}
+				for(i = l; i < _COUNT; i++){
+					this.renderVideoDetail(null, i);
+				}
+			}
+			
+			private function renderVideoDetail(video:com.avManager.model.data.Video, index:int):void{
+				var videoDetail:VideoDetail = _container.getElementAt(index) as VideoDetail;
+				if(videoDetail){
+					videoDetail.video = video;
+				}
+			}
+			
+			protected function onCreationCompleted(event:FlexEvent):void
+			{
+				var videoDetail:VideoDetail = null;
+				for(var i:int = 0; i < _COUNT; i++){
+					videoDetail = new VideoDetail();
+					_container.addElement(videoDetail);
+				}
+			}
+			
+			protected function onPrevPage(event:MouseEvent):void
+			{
+				if(this._curPage > 1){
+					this._curPage--;
+					fetchVideo(false);
+				}
+				
+			}
+			
+			protected function onNextPage(event:MouseEvent):void
+			{
+				if(this._curPage < this._totalPage) {
+					this._curPage++;
+					fetchVideo();
+				}
+			}
+			
+			protected function onCodeSearch(event:MouseEvent):void
+			{
+				this._curPage = 1;
+				_firstVideoID = "000000000000000000000000";
+				_lastVideoID = "000000000000000000000000";
+				fetchVideo();
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	<s:HGroup width="100%" height="26" verticalAlign="middle">
+		<s:HGroup width="50%" height="100%" paddingLeft="6" verticalAlign="middle">
+			<s:TextInput id="_codeInput"/>
+			<s:Button label="搜索车号" click="onCodeSearch(event)"/>
+		</s:HGroup>
+		<s:HGroup width="50%" height="100%" horizontalAlign="right" paddingRight="6"
+				  verticalAlign="middle">
+			<s:Button label="前一页" click="onPrevPage(event)"/>
+			<s:Button label="后一页" click="onNextPage(event)"/>
+			<s:Label text="{this._curPage}/{this._totalPage}" verticalAlign="middle" height="100%"/>
+		</s:HGroup>
+	</s:HGroup>
+	<s:Scroller width="100%" height="100%">
+		<s:TileGroup id="_container" width="100%" height="100%" paddingRight="6" paddingLeft="6"/>
+	</s:Scroller>
+</s:VGroup>
