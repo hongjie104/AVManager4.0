@@ -11,4 +11,6 @@ router.get('', function *(next) {
 
 router.get('actress', actressController.index);
 
+router.get('getActress/:lastID/:count', actressController.getActress);
+
 module.exports = router;

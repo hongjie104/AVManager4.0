@@ -1,8 +1,72 @@
 <?xml version="1.0" encoding="utf-8"?>
-<s:WindowedApplication xmlns:fx="http://ns.adobe.com/mxml/2009" 
-					   xmlns:s="library://ns.adobe.com/flex/spark" 
-					   xmlns:mx="library://ns.adobe.com/flex/mx">
+<s:WindowedApplication xmlns:fx="http://ns.adobe.com/mxml/2009"
+					   xmlns:s="library://ns.adobe.com/flex/spark"
+					   xmlns:mx="library://ns.adobe.com/flex/mx"
+					   width="1200" height="800">
+	<fx:Script>
+		<![CDATA[
+			import flash.utils.describeType;
+			
+			import mx.events.MenuEvent;
+			
+			import org.avManager.API;
+			import org.avManager.Net;
+			import org.avManager.model.Config;
+			import org.avManager.view.config.ConfigWin;
+			import org.libra.flex.utils.PopUpUtil;
+			
+			protected function munuItemClickHandler(event:MenuEvent):void {
+				if(event.label == "测试") {
+					test();
+				} else if(event.label == "设置") {
+					PopUpUtil.instance.addPopUp(new ConfigWin(), this, true, 1);
+				}
+			}
+			
+			private function test(...args):void {
+//				var loader:URLLoader = new URLLoader();
+//				loader.load(new URLRequest("http://127.0.0.1:3630/actress"));
+//				loader.addEventListener(Event.COMPLETE, onLoaded);
+				Net.instance.fetch(API.getActress(2, "001dce0230ba5c382e5c0000"), this.onLoaded);
+			}
+			
+			private function onLoaded(data:Object):void{
+				trace(data);
+			}
+			
+		]]>
+	</fx:Script>
 	<fx:Declarations>
 		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+		<fx:XMLList id="menuBar">  
+			<menuitem label="文件">
+				<menuitem label="新建项目"/>
+				<menuitem label="打开"/>
+				<menuitem label="保存" enabled="false" icon="myIcon"/>
+				<menuitem label="另存为..." toggled="true" type="check"/>
+				<menuitem label="" type="separator"/>
+				<menuitem label="输出">
+					<menuitem label="BMPL" groupName="one" type="radio"/>
+					<menuitem label="图片" groupName="one" toggled="true" type="radio"/>
+				</menuitem>
+				<menuitem label="打印"/>
+				<menuitem label="退出"/>
+			</menuitem>
+			<menuitem label="项目">
+				<menuitem label="设置"/>
+			</menuitem>
+			<menuitem label="编辑"/>
+			<menuitem label="查看"/>
+			<menuitem label="工具">
+				<menuitem label="家具编辑器"/>
+			</menuitem>
+			<menuitem label="帮助">
+				<menuitem label="关于"/>
+				<menuitem label="测试"/>
+			</menuitem>
+		</fx:XMLList>
 	</fx:Declarations>
+	<!-- 菜单栏 -->
+	<mx:MenuBar width="100%" dataProvider="{menuBar}" itemClick="munuItemClickHandler(event)"
+				labelField="@label"/>
 </s:WindowedApplication>
