@@ -17,5 +17,5 @@ exports.getActress = function *() {
 	lastID = mongoose.Types.ObjectId(lastID);
 	const count = numberUtil.toInt(this.params.count);
 	let actresses = yield ActressModel.find({_id: {$gt: lastID}}).limit(count);
-	this.body = jsonUtil.createAPI(1, jsonUtil.actresses2Json(actresses))
+	this.body = jsonUtil.createAPI(1, jsonUtil.actresses2Json(actresses));
 };

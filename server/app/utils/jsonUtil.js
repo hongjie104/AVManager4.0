@@ -47,6 +47,31 @@ exports.actresses2Json = function(actresses) {
 	return result;
 };
 
+function _video2Json(video) {
+	return {
+		_id: video._id,
+		name: video.name,
+		code: video.code,
+		date: dateUtil.toTimestamp(video.date),
+		category: video.category,
+		series: video.series,
+		actress: video.actress,
+		score: video.score
+	};
+}
+
+exports.video2Json = function (video) {
+	return _video2Json(video);
+};
+
+exports.videoes2Json = function (videoes) {
+	let result = [];
+	for (let i = 0; i < videoes.length; i++) {
+		result[i] = _video2Json(videoes[i]);
+	}
+	return result;
+};
+
 // function _deepcopy(source) {
 // 	let result = source instanceof Array ? [] : {};
 // 	let t = null;
