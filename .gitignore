@@ -201,3 +201,4 @@ AVManager/
 dbBackup/
 checkVideoImg.py
 !/server/bin/
+!/client/desktop/src/org/
