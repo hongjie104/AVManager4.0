@@ -47,7 +47,7 @@
 				var l:int = data.video.length;
 				if(l > 0){
 					_firstVideoID = data.video[0]._id;
-					_lastVideoID = data.video[l - 1]._id;	
+					_lastVideoID = data.video[l - 1]._id;
 				}
 				
 				for(var i:int = 0; i < l; i++) {

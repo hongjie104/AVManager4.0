@@ -6,7 +6,6 @@ package com.avManager.model
 	import flash.filesystem.File;
 	import flash.filesystem.FileMode;
 	import flash.filesystem.FileStream;
-	
 	import flash.utils.describeType;
 
 	public final class Config
@@ -20,10 +19,34 @@ package com.avManager.model
 		
 		private var _videoPath:String = "";
 		
+		private var _videoFormat:String = "mp4;avi;wmv;rmvb;mkv";
+		
+		private var _actressPath:String = "E:\\codeLib\\wpf\\AVManager3\\actress";
+		
 		public function Config()
 		{
 		}
 		
+		public function get videoFormat():String
+		{
+			return _videoFormat;
+		}
+
+		public function set videoFormat(value:String):void
+		{
+			_videoFormat = value;
+		}
+
+		public function get actressPath():String
+		{
+			return _actressPath;
+		}
+
+		public function set actressPath(value:String):void
+		{
+			_actressPath = value;
+		}
+
 		public function get videoPath():String
 		{
 			return _videoPath;
@@ -56,6 +79,10 @@ package com.avManager.model
 
 		public static function getVideoPath():Array {
 			return Config._instance._videoPath.split(";");
+		}
+		
+		public static function getVideoFormat():Array {
+			return Config._instance._videoFormat.split(";");
 		}
 		
 		public static function loadConfig():void {

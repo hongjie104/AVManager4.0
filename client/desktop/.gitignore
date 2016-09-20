@@ -1,3 +1,6 @@
 .settings/
 bin-debug/
 !/src/com/avManager/
+.actionScriptProperties
+.project
+*.exe

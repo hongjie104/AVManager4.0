@@ -1,14 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <s:VGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
 		  xmlns:s="library://ns.adobe.com/flex/spark" 
-		  xmlns:mx="library://ns.adobe.com/flex/mx" width="147" height="233">
+		  xmlns:mx="library://ns.adobe.com/flex/mx" width="147" height="233" creationComplete="onCreationCompleted(event)">
 	
 	<fx:Script>
 		<![CDATA[
+			import com.avManager.model.Config;
 			import com.avManager.model.data.Video;
+			
+			import mx.events.FlexEvent;
+			
+			import org.libra.flex.utils.NativeProcessUtil;
 			import org.libra.utils.DateUtil;
 			
 			private var _video:com.avManager.model.data.Video;
+			
+			private var openItem:NativeMenuItem = new NativeMenuItem("打开文件夹");
+			private var playItem:NativeMenuItem = new NativeMenuItem("播放");
 			
 			public function get video():com.avManager.model.data.Video
 			{
@@ -20,6 +28,19 @@
 				_video = value;
 				if(value) {
 					_infoLabel.text = value.code + " / " + DateUtil.toString(value.date);
+					var f:File;
+					var imgName:String = "\\" + value.code + "\\" + value.code + "s.jpg";
+					var pathArr:Array = Config.getVideoPath();
+					for each(var p:String in pathArr) {
+						f = new File(p + imgName);
+						if(f.exists) {
+							_img.source = f.nativePath;
+							break;
+						}
+					}
+					this.visible = true;
+				} else {
+					this.visible = false;
 				}
 			}
 			
@@ -27,6 +48,53 @@
 			{
 				
 			}
+			
+			protected function onCreationCompleted(event:FlexEvent):void
+			{
+				var contextMenu:ContextMenu = new ContextMenu();
+				
+				// 新建项目按钮
+				openItem.addEventListener(Event.SELECT, onOpen);
+				contextMenu.addItem(openItem);
+				
+				playItem.addEventListener(Event.SELECT, onPlay);
+				contextMenu.addItem(playItem);
+
+				this.contextMenu = contextMenu;
+			}
+			
+			private function onOpen(evt:Event):void{
+				var pathArr:Array = Config.getVideoPath();
+				var f:File;
+				for each(var p:String in pathArr) {
+					f = new File(p + "\\" + video.code);
+					if(f.exists && f.isDirectory) {
+						NativeProcessUtil.runCMD("start", f.nativePath, "/max");		
+						break;
+					}
+				}
+			}
+			
+			private function onPlay(evt:Event):void{
+				var pathArr:Array = Config.getVideoPath();
+				var formatArr:Array = Config.getVideoFormat();
+				var f:File;
+				var exists:Boolean = false;
+				for each(var p:String in pathArr) {
+					for each(var format:String in formatArr){
+						f = new File(p + "\\" + video.code + "\\" + video.code + "." + format);
+						if(f.exists) {
+							f.openWithDefaultApplication();
+							exists = true;
+							break;
+						}	
+					}
+					if(exists){
+						break;
+					}
+				}
+			}
+			
 		]]>
 	</fx:Script>
 	
