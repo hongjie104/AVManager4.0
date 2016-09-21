@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:VGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" width="100%" height="100%" addedToStage="onAddedToStage(event)">
+	
+	<fx:Script>
+		<![CDATA[
+			
+			// 一页的数量
+			private static const _COUNT:int = 27;
+			
+			private static var _totalCount:int = 0;
+			
+			private static var _lastVideoID:String = "000000000000000000000000";
+			
+			private static var _firstVideoID:String = "000000000000000000000000";
+			
+			[Bindable]
+			private var _totalPage:int = 0;
+			
+			[Bindable]
+			private var _curPage:int = 1;
+			
+			protected function onAddedToStage(event:Event):void
+			{
+				
+			}
+			
+			private function fetchActress(isNext:Boolean = true):void{
+				
+			}
+			
+			protected function onPrevPage(event:MouseEvent):void
+			{
+				if(this._curPage > 1){
+					this._curPage--;
+					fetchActress(false);
+				}
+				
+			}
+			
+			protected function onNextPage(event:MouseEvent):void
+			{
+				if(this._curPage < this._totalPage) {
+					this._curPage++;
+					fetchActress();
+				}
+			}
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	<s:HGroup width="100%" height="26" verticalAlign="middle">
+		<s:HGroup width="50%" height="100%" paddingLeft="6" verticalAlign="middle">
+			<s:Label text="aaaa"/>
+		</s:HGroup>
+		<s:HGroup width="50%" height="100%" horizontalAlign="right" paddingRight="6"
+				  verticalAlign="middle">
+			<s:Button label="前一页" click="onPrevPage(event)"/>
+			<s:Button label="后一页" click="onNextPage(event)"/>
+			<s:Label text="{this._curPage}/{this._totalPage}" verticalAlign="middle" height="100%"/>
+		</s:HGroup>
+	</s:HGroup>
+	<s:Scroller width="100%" height="100%">
+		<s:TileGroup id="_container" width="100%" height="100%" paddingRight="6" paddingLeft="6"/>
+	</s:Scroller>
+</s:VGroup>

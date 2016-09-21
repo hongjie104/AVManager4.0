@@ -1,6 +1,7 @@
 .settings/
 bin-debug/
 !/src/com/avManager/
+!/src/com/avManager/view/actress
 .actionScriptProperties
 .project
 *.exe
