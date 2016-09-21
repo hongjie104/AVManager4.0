@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" width="100%" height="100%">
+	<fx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			[Bindable]
+			private var _test:ArrayCollection = new ArrayCollection([
+				{name: "name1", num: 10},
+				{name: "name2", num: 20},
+				{name: "name3", num: 30},
+				{name: "name4", num: 40},
+				{name: "name5", num: 50},
+				{name: "name6", num: 60},
+			]);
+			
+			//显示标签时的回调函数 
+			
+			private function showLabel(data:Object, field:String, index:Number, percentValue:Number):String { 
+				
+				//返回的值，就是饼图要显示的标签。这里用当前滑杆的值（data.num）除以三个滑杆当前值的总和，得出百分比 
+				
+				//注：data.num表示的就是PieSeries组件对象的field属性，也就是当前滑杆的值 
+				
+				return percentValue + "%"; 
+			}
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	<mx:PieChart id="piechart1" x="270" y="356" dataProvider="{_test}">
+		<mx:series>
+			<mx:PieSeries displayName="Series 1" field="num" nameField="name" labelFunction="showLabel" labelPosition="inside"/>
+		</mx:series>
+	</mx:PieChart>
+	<mx:Legend dataProvider="{piechart1}"/>
+</s:Group>

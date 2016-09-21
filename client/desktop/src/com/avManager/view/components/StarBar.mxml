@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:HGroup xmlns:fx="http://ns.adobe.com/mxml/2009"
+		  xmlns:s="library://ns.adobe.com/flex/spark"
+		  xmlns:mx="library://ns.adobe.com/flex/mx"
+		  width="200" height="16" gap="2" horizontalAlign="center" verticalAlign="middle">
+	<fx:Script>
+		<![CDATA[
+			
+			import spark.components.Image;
+			
+			private var _score:int = 0;
+			
+			public function get score():int
+			{
+				return _score;
+			}
+
+			public function set score(value:int):void
+			{
+//				value = Math.random() * 100;
+				var image:Image;
+				var numElements:int = _starContainer.numElements;
+				for(var i:int = 0; i < 5; i++){
+					if(i < numElements){
+						image = createStar(value, i, _starContainer.getElementAt(i) as Image);
+					} else {
+						image = createStar(value, i);
+						image.x = this.height * i;
+						image.y = 0;
+						_starContainer.addElement(image);
+					}
+				}
+				
+				_scoreLabel.text = value.toString();
+			}
+
+			private function createStar(score:int, index:int, img:Image = null):Image{
+				img = img || new Image();
+				var max:int = (index + 1) * 20;
+				if(score >= max){
+					img.source = "assets/star_full.png";
+				} else if(score >= max - 10) {
+					img.source = "assets/star_half.png";
+				} else {
+					img.source = "assets/star_empty.png";
+				}
+				img.width = this.height;
+				img.height = this.height;
+				return img;
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	<s:Group id="_starContainer" width="80" height="100%"/>
+	<s:Label id="_scoreLabel" height="100%" text="36" textAlign="left" verticalAlign="bottom"/>
+</s:HGroup>

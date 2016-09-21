@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<s:VGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
-		  xmlns:s="library://ns.adobe.com/flex/spark" 
-		  xmlns:mx="library://ns.adobe.com/flex/mx" width="147" height="233" creationComplete="onCreationCompleted(event)">
+<s:VGroup xmlns:fx="http://ns.adobe.com/mxml/2009"
+		  xmlns:s="library://ns.adobe.com/flex/spark"
+		  xmlns:mx="library://ns.adobe.com/flex/mx"
+		  xmlns:components="com.avManager.view.components.*"
+		  width="147" height="241" creationComplete="onCreationCompleted(event)" gap="2">
 	
 	<fx:Script>
 		<![CDATA[
@@ -18,6 +20,7 @@
 			private var openItem:NativeMenuItem = new NativeMenuItem("打开文件夹");
 			private var playItem:NativeMenuItem = new NativeMenuItem("播放");
 			
+			[Bindable]
 			public function get video():com.avManager.model.data.Video
 			{
 				return _video;
@@ -38,6 +41,7 @@
 							break;
 						}
 					}
+					_starBar.score = value.score;
 					this.visible = true;
 				} else {
 					this.visible = false;
@@ -87,7 +91,7 @@
 							f.openWithDefaultApplication();
 							exists = true;
 							break;
-						}	
+						}
 					}
 					if(exists){
 						break;
@@ -102,6 +106,7 @@
 		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
 	</fx:Declarations>
 	<s:Image id="_img" source="@Embed('assets/defaultVideoCoverSmall.jpg')" click="onClicked(event)"/>
-	<s:Label id="_infoLabel" width="100%" height="26" color="#CC0000" textAlign="center"
+	<s:Label id="_infoLabel" width="100%" height="20" color="#CC0000" text="fg" textAlign="center"
 			 verticalAlign="middle"/>
+	<components:StarBar id="_starBar" width="100%"/>
 </s:VGroup>
