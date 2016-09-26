@@ -8,6 +8,7 @@
 		<![CDATA[
 			import com.avManager.API;
 			import com.avManager.Net;
+			import com.avManager.model.Config;
 			import com.avManager.model.data.Actress;
 			import com.avManager.model.data.Video;
 			import com.avManager.view.actress.ActressCell;
@@ -49,6 +50,17 @@
 					_dateLabel.text = DateUtil.toString(_video.date);
 					_scoreSlider.value = _video.score;
 					_magnetContainer.videoCode = _video.code;
+					
+					var f:File;
+					var imgName:String = "\\" + _video.code + "\\" + _video.code + "l.jpg";
+					var pathArr:Array = Config.getVideoPath();
+					for each(var p:String in pathArr) {
+						f = new File(p + imgName);
+						if(f.exists) {
+							_img.source = f.nativePath;
+							break;
+						}
+					}
 					
 					Net.instance.fetch(API.getActressedByID(_video.actress), this.onFetchActresses);
 				}

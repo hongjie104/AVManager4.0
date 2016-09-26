@@ -5,6 +5,7 @@
 		  width="125" height="145" creationComplete="onCreationCompleted(event)" gap="4">
 	<fx:Script>
 		<![CDATA[
+			import com.avManager.model.Config;
 			import com.avManager.model.data.Actress;
 			
 			import mx.events.FlexEvent;
@@ -23,6 +24,12 @@
 				if(value) {
 					this.visible = true;
 					_nameLabel.text = value.name;
+					var f:File = new File(Config.instance.actressPath + "/" + value.javBusCode + "/" + value.javBusCode + ".jpg");
+					if(f.exists) {
+						_img.source = f.nativePath;
+					} else {
+						_img.source = 'assets/defaultActress.png'; 
+					}
 				} else {
 					this.visible = false;
 				}
