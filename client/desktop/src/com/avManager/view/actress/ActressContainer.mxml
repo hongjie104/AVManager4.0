@@ -1,19 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-<s:VGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
-		 xmlns:s="library://ns.adobe.com/flex/spark" 
-		 xmlns:mx="library://ns.adobe.com/flex/mx" width="100%" height="100%" addedToStage="onAddedToStage(event)">
+<s:VGroup xmlns:fx="http://ns.adobe.com/mxml/2009"
+		  xmlns:s="library://ns.adobe.com/flex/spark"
+		  xmlns:mx="library://ns.adobe.com/flex/mx"
+		  width="100%" height="100%" addedToStage="onAddedToStage(event)"
+		  creationComplete="onCreationCompleted(event)">
 	
 	<fx:Script>
 		<![CDATA[
+			import com.avManager.API;
+			import com.avManager.Net;
+			import com.avManager.model.data.Actress;
+			
+			import mx.events.FlexEvent;
+			
+			import org.libra.utils.text.StringUtil;
 			
 			// 一页的数量
-			private static const _COUNT:int = 27;
+			private static const _COUNT:int = 50;
 			
 			private static var _totalCount:int = 0;
-			
-			private static var _lastVideoID:String = "000000000000000000000000";
-			
-			private static var _firstVideoID:String = "000000000000000000000000";
 			
 			[Bindable]
 			private var _totalPage:int = 0;
@@ -23,18 +28,44 @@
 			
 			protected function onAddedToStage(event:Event):void
 			{
-				
+//				this.fetchActress();
 			}
 			
-			private function fetchActress(isNext:Boolean = true):void{
+			private function fetchActress():void{
+				var code:String = _codeInput.text;
+				if(StringUtil.isNullOrEmpty(code)) {
+					code = "!";
+				}
+				Net.instance.fetch(API.getActress((_curPage - 1) * _COUNT, _COUNT, this._sortTypeComboBox.selectedIndex + 1, code), onFetchActress);
+			}
+			
+			private function onFetchActress(data:Object):void{
+				_totalCount = data.count;
+				_totalPage = Math.ceil(_totalCount / _COUNT);
 				
+				var l:int = data.actress.length;
+				for(var i:int = 0; i < l; i++) {
+					var a:Actress = new Actress();
+					a.createWithJson(data.actress[i]);
+					this.renderActressDetail(a, i);
+				}
+				for(i = l; i < _COUNT; i++){
+					this.renderActressDetail(null, i);
+				}	
+			}
+			
+			private function renderActressDetail(actress:Actress, index:int):void{
+				var videoDetail:ActressCell = _container.getElementAt(index) as ActressCell;
+				if(videoDetail){
+					videoDetail.actress = actress;
+				}	
 			}
 			
 			protected function onPrevPage(event:MouseEvent):void
 			{
 				if(this._curPage > 1){
 					this._curPage--;
-					fetchActress(false);
+					fetchActress();
 				}
 				
 			}
@@ -46,6 +77,26 @@
 					fetchActress();
 				}
 			}
+			
+			protected function onCreationCompleted(event:FlexEvent):void
+			{
+				var actressCell:ActressCell = null;
+				for(var i:int = 0; i < _COUNT; i++){
+					actressCell = new ActressCell();
+					_container.addElement(actressCell);
+				}
+			}
+			
+			private function onSortTypeComboBoxChanged(evt:Event):void{
+				this._curPage = 1;
+				fetchActress();
+			}
+			
+			private function onSearch(evt:Event):void{
+				this._curPage = 1;
+				fetchActress();
+			}
+			
 		]]>
 	</fx:Script>
 	
@@ -54,16 +105,28 @@
 	</fx:Declarations>
 	<s:HGroup width="100%" height="26" verticalAlign="middle">
 		<s:HGroup width="50%" height="100%" paddingLeft="6" verticalAlign="middle">
-			<s:Label text="aaaa"/>
+			<s:TextInput id="_codeInput"/>
+			<s:Button label="搜索女司机" click="onSearch(event)"/>
+			<s:ComboBox id="_sortTypeComboBox" width="86" change="onSortTypeComboBoxChanged(event)"
+						initialize="_sortTypeComboBox.textInput.editable=false" selectedIndex="0">
+				<s:ArrayCollection>
+					<fx:String>按评分降序</fx:String>
+					<fx:String>按评分升序</fx:String>
+					<fx:String>按身高降序</fx:String>
+					<fx:String>按身高升序</fx:String>
+					<fx:String>按生日降序</fx:String>
+					<fx:String>按生日升序</fx:String>
+				</s:ArrayCollection>
+			</s:ComboBox>
 		</s:HGroup>
 		<s:HGroup width="50%" height="100%" horizontalAlign="right" paddingRight="6"
 				  verticalAlign="middle">
 			<s:Button label="前一页" click="onPrevPage(event)"/>
 			<s:Button label="后一页" click="onNextPage(event)"/>
-			<s:Label text="{this._curPage}/{this._totalPage}" verticalAlign="middle" height="100%"/>
+			<s:Label height="100%" text="{this._curPage}/{this._totalPage}" verticalAlign="middle"/>
 		</s:HGroup>
 	</s:HGroup>
 	<s:Scroller width="100%" height="100%">
-		<s:TileGroup id="_container" width="100%" height="100%" paddingRight="6" paddingLeft="6"/>
+		<s:TileGroup id="_container" width="100%" height="100%" paddingLeft="6" paddingRight="6"/>
 	</s:Scroller>
 </s:VGroup>

@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009"
+			   xmlns:s="library://ns.adobe.com/flex/spark"
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   width="1200" height="618" close="onCloseHandler(event)"
+			   creationComplete="onCreationCompleted(event)" xmlns:video="com.avManager.view.video.*">
+	<fx:Script>
+		<![CDATA[
+			import com.avManager.API;
+			import com.avManager.Net;
+			import com.avManager.model.data.Actress;
+			import com.avManager.model.data.Video;
+			import com.avManager.view.actress.ActressCell;
+			
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			
+			import org.libra.flex.utils.PopUpUtil;
+			import org.libra.utils.DateUtil;
+			
+			private var _video:com.avManager.model.data.Video;
+			
+			public function get video():com.avManager.model.data.Video
+			{
+				return _video;
+			}
+
+			public function set video(value:com.avManager.model.data.Video):void
+			{
+				_video = value;
+				if(value) {
+					renderVideo();
+				}
+			}
+			
+			private function onCloseHandler(event:CloseEvent = null):void {
+				PopUpUtil.instance.removePopUp(this, 1);
+			}
+
+			protected function onCreationCompleted(event:FlexEvent):void
+			{
+				renderVideo();
+			}
+			
+			private function renderVideo():void{
+				if(this.initialized){
+					_titleLabel.text = _video.name;
+					_codeLabel.text = _video.code;
+					_dateLabel.text = DateUtil.toString(_video.date);
+					_scoreSlider.value = _video.score;
+					_magnetContainer.videoCode = _video.code;
+					
+					Net.instance.fetch(API.getActressedByID(_video.actress), this.onFetchActresses);
+				}
+			}
+			
+			private function onFetchActresses(actresses:Array):void{
+				_actressContainer.removeAllElements();
+				
+				var actressCell:ActressCell;
+				var actress:Actress;
+				for each(var actressObj:Object in actresses) {
+					actress = new Actress();
+					actress.createWithJson(actressObj);
+					actressCell = new ActressCell();
+					actressCell.actress = actress;
+					_actressContainer.addElement(actressCell);
+				}
+				
+				Net.instance.fetch(API.getCategoryByID(_video.category), this.onFetchCategory);
+			}
+			
+			private function onFetchCategory(categorys:Array):void{
+				var s:String = "";
+				for each(var category:Object in categorys) {
+					s += category.name + " ";
+				}
+				_categoryLabel.text = s;
+				
+				Net.instance.fetch(API.getSeriesByID(_video.series), this.onFetchSeries);
+			}
+			
+			private function onFetchSeries(series:Object):void{
+				_seriesLabel.text = series.name;				
+			}
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	<s:HGroup width="100%" height="100%">
+		<s:VGroup width="800" height="100%">
+			<s:Label id="_titleLabel" width="100%" height="36"/>
+			<s:Image id="_img" width="800" height="537"
+					 source="@Embed('assets/defaultVideoCover.jpg')"/>
+		</s:VGroup>
+		<s:VGroup width="100%" height="100%" gap="4" horizontalAlign="left" paddingTop="6">
+			<s:HGroup width="100%" height="18" textAlign="center" verticalAlign="middle">
+				<s:Label width="70" fontWeight="bold" text="车牌号:" textAlign="left"/>
+				<s:Label id="_codeLabel"/>
+			</s:HGroup>
+			<s:HGroup width="100%" height="18" textAlign="center" verticalAlign="middle">
+				<s:Label width="70" fontWeight="bold" text="发车日期:" textAlign="left"/>
+				<s:Label id="_dateLabel"/>
+			</s:HGroup>
+			<s:HGroup width="100%" height="18" textAlign="center" verticalAlign="middle">
+				<s:Label width="70" fontWeight="bold" text="类别:" textAlign="left"/>
+				<s:Label id="_categoryLabel"/>
+			</s:HGroup>
+			<s:HGroup width="100%" height="18" textAlign="center" verticalAlign="middle">
+				<s:Label width="70" fontWeight="bold" text="系列:" textAlign="left"/>
+				<s:Label id="_seriesLabel"/>
+			</s:HGroup>
+			<s:HGroup width="100%" height="18" paddingRight="6" textAlign="center"
+					  verticalAlign="middle">
+				<s:Label width="70" fontWeight="bold" text="评分:" textAlign="left"/>
+				<s:HSlider id="_scoreSlider" width="100%" maximum="100"/>
+				<s:Label id="_scoreLabel" width="20" text="36"/>
+			</s:HGroup>
+			<s:VGroup width="100%">
+				<s:Label width="70" fontWeight="bold" text="女司机:" textAlign="left"/>
+				<s:Scroller width="100%" height="296">
+					<s:TileGroup id="_actressContainer" width="387" horizontalGap="4"
+								 orientation="rows"/>	
+				</s:Scroller>
+			</s:VGroup>
+			<video:MagnetContainer width="100%" id="_magnetContainer"/>
+		</s:VGroup>
+	</s:HGroup>
+</s:TitleWindow>

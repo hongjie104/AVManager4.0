@@ -72,6 +72,44 @@ exports.videoes2Json = function (videoes) {
 	return result;
 };
 
+function _category2Json(category) {
+	return {
+		_id: category._id,
+		name: category.name
+	};
+}
+
+exports.category2Json = function (category) {
+	return _category2Json(category);
+};
+
+exports.categorys2Json = function (categorys) {
+	let result = [];
+	for (let i = 0; i < categorys.length; i++) {
+		result[i] = _category2Json(categorys[i]);
+	}
+	return result;
+};
+
+function _series2Json(series) {
+	return {
+		_id: series._id,
+		name: series.name
+	};
+}
+
+exports.series2Json = function (series) {
+	return _series2Json(series);
+};
+
+exports.serieses2Json = function (serieses) {
+	let result = [];
+	for (let i = 0; i < serieses.length; i++) {
+		result[i] = _series2Json(serieses[i]);
+	}
+	return result;
+};
+
 // function _deepcopy(source) {
 // 	let result = source instanceof Array ? [] : {};
 // 	let t = null;

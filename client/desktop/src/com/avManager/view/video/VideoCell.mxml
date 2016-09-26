@@ -7,6 +7,7 @@
 	
 	<fx:Script>
 		<![CDATA[
+			import com.avManager.events.VideoEvent;
 			import com.avManager.model.Config;
 			import com.avManager.model.data.Video;
 			
@@ -20,7 +21,6 @@
 			private var openItem:NativeMenuItem = new NativeMenuItem("打开文件夹");
 			private var playItem:NativeMenuItem = new NativeMenuItem("播放");
 			
-			[Bindable]
 			public function get video():com.avManager.model.data.Video
 			{
 				return _video;
@@ -50,7 +50,7 @@
 			
 			protected function onClicked(event:MouseEvent):void
 			{
-				
+				this.dispatchEvent(new com.avManager.events.VideoEvent(com.avManager.events.VideoEvent.SHOW_DETAIL, this.video));	
 			}
 			
 			protected function onCreationCompleted(event:FlexEvent):void
@@ -105,7 +105,7 @@
 	<fx:Declarations>
 		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
 	</fx:Declarations>
-	<s:Image id="_img" source="@Embed('assets/defaultVideoCoverSmall.jpg')" click="onClicked(event)"/>
+	<s:Image id="_img" click="onClicked(event)" source="@Embed('assets/defaultVideoCoverSmall.jpg')"/>
 	<s:Label id="_infoLabel" width="100%" height="20" color="#CC0000" text="fg" textAlign="center"
 			 verticalAlign="middle"/>
 	<components:StarBar id="_starBar" width="100%"/>

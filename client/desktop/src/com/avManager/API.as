@@ -1,6 +1,9 @@
 package com.avManager
 {
 	import com.avManager.model.Config;
+	
+	import org.libra.utils.MathUtil;
+	import org.libra.utils.text.StringUtil;
 
 	public final class API
 	{
@@ -12,16 +15,32 @@ package com.avManager
 			return Config.instance.localServer;
 		}
 		
-		public static function getVideo(count:int = 20, lastID:String = "000000000000000000000000", next:Boolean = true):String {
-			return getLocalServer() + "/getVideo/" + lastID + "/" + count + "/" + (next ? 1 : 0);
+		public static function getVideo(startIndex:int, count:int, sortType:int = 1, keyWord:String = "!"):String {
+			return getLocalServer() + "/getVideo/" + MathUtil.max(0, startIndex) + "/" + MathUtil.max(0, count) + "/" + sortType + "/" + encodeURIComponent(keyWord);
 		}
 		
-		public static function getVideoByCode(code:String, count:int = 20, lastID:String = "000000000000000000000000", next:Boolean = true):String {
-			return getLocalServer() + "/searchCode/" + code + "/" + lastID + "/" + count + "/" + (next ? 1 : 0);
+		public static function getActress(startIndex:int, count:int, sortType:int = 1, keyWord:String = "!"):String {
+			return getLocalServer() + "/getActress/" + MathUtil.max(0, startIndex) + "/" + MathUtil.max(0, count) + "/" + sortType + "/" + encodeURIComponent(keyWord);
 		}
 		
-		public static function getActress(count:int = 20, lastID:String = "000000000000000000000000"):String {
-			return getLocalServer() + "/getActress/" + lastID + "/" + count;
+		public static function getActressedByID(ids:Vector.<String>):String{
+			var idStr:String = ids.join("&");
+			if(StringUtil.isNullOrEmpty(idStr)){
+				idStr = "!";
+			}
+			return getLocalServer() + "/getActressedByID/" + idStr;
+		}
+		
+		public static function getCategoryByID(ids:Vector.<String>):String{
+			var idStr:String = ids.join("&");
+			if(StringUtil.isNullOrEmpty(idStr)){
+				idStr = "!";
+			}
+			return getLocalServer() + "/getCategoryByID/" + idStr;
+		}
+		
+		public static function getSeriesByID(id:String):String{
+			return getLocalServer() + "/getSeriesByID/" + id; 
 		}
 	}
 }

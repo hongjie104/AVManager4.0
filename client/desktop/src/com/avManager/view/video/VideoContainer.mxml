@@ -1,24 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
-<s:VGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
-		  xmlns:s="library://ns.adobe.com/flex/spark" 
-		  xmlns:mx="library://ns.adobe.com/flex/mx" width="100%" height="100%" xmlns:video="com.avManager.view.video.*" addedToStage="onAddedToStage(event)" creationComplete="onCreationCompleted(event)">
+<s:VGroup xmlns:fx="http://ns.adobe.com/mxml/2009"
+		  xmlns:s="library://ns.adobe.com/flex/spark"
+		  xmlns:mx="library://ns.adobe.com/flex/mx"
+		  xmlns:video="com.avManager.view.video.*"
+		  width="100%" height="100%" addedToStage="onAddedToStage(event)"
+		  creationComplete="onCreationCompleted(event)">
 	<fx:Script>
 		<![CDATA[
+			import com.avManager.API;
+			import com.avManager.Net;
+			import com.avManager.events.VideoEvent;
+			import com.avManager.model.data.Video;
+			
 			import mx.collections.ArrayCollection;
 			import mx.events.FlexEvent;
 			
-			import com.avManager.API;
-			import com.avManager.Net;
-			import com.avManager.model.data.Video;
+			import org.libra.flex.utils.PopUpUtil;
+			import org.libra.utils.text.StringUtil;
+			
+			import spark.events.IndexChangeEvent;
 			
 			// 一页的数量
 			private static const _COUNT:int = 27;
 			
 			private static var _totalCount:int = 0;
-			
-			private static var _lastVideoID:String = "000000000000000000000000";
-			
-			private static var _firstVideoID:String = "000000000000000000000000";
 			
 			[Bindable]
 			private var _totalPage:int = 0;
@@ -31,13 +36,12 @@
 				this.fetchVideo();
 			}
 			
-			private function fetchVideo(next:Boolean = true):void{
+			private function fetchVideo():void{
 				var code:String = _codeInput.text;
-				if(code != "") {
-					Net.instance.fetch(API.getVideoByCode(code, _COUNT, next ? _lastVideoID : _firstVideoID, next), this.onFetchVideo);
-				} else {
-					Net.instance.fetch(API.getVideo(_COUNT, next ? _lastVideoID : _firstVideoID, next), onFetchVideo);
+				if(StringUtil.isNullOrEmpty(code)) {
+					code = "!";
 				}
+				Net.instance.fetch(API.getVideo((_curPage - 1) * _COUNT, _COUNT, this._sortTypeComboBox.selectedIndex + 1, code), onFetchVideo);
 			}
 			
 			private function onFetchVideo(data:Object):void{
@@ -45,11 +49,6 @@
 				_totalPage = Math.ceil(_totalCount / _COUNT);
 				
 				var l:int = data.video.length;
-				if(l > 0){
-					_firstVideoID = data.video[0]._id;
-					_lastVideoID = data.video[l - 1]._id;
-				}
-				
 				for(var i:int = 0; i < l; i++) {
 					var v:com.avManager.model.data.Video = new com.avManager.model.data.Video();
 					v.createWithJson(data.video[i]);
@@ -69,18 +68,25 @@
 			
 			protected function onCreationCompleted(event:FlexEvent):void
 			{
-				var videoDetail:VideoCell = null;
+				var videoCell:VideoCell = null;
 				for(var i:int = 0; i < _COUNT; i++){
-					videoDetail = new VideoCell();
-					_container.addElement(videoDetail);
+					videoCell = new VideoCell();
+					_container.addElement(videoCell);
+					videoCell.addEventListener(com.avManager.events.VideoEvent.VIDEO_EVENT, onVideoEvent);
 				}
+			}
+			
+			private function onVideoEvent(evt:com.avManager.events.VideoEvent):void{
+				var videoDetail:VideoDetail = new VideoDetail();
+				videoDetail.video = evt.video;
+				PopUpUtil.instance.addPopUp(videoDetail, this, true, 1);
 			}
 			
 			protected function onPrevPage(event:MouseEvent):void
 			{
 				if(this._curPage > 1){
 					this._curPage--;
-					fetchVideo(false);
+					fetchVideo();
 				}
 				
 			}
@@ -96,9 +102,13 @@
 			protected function onCodeSearch(event:MouseEvent):void
 			{
 				this._curPage = 1;
-				_firstVideoID = "000000000000000000000000";
-				_lastVideoID = "000000000000000000000000";
 				fetchVideo();
+			}
+			
+			protected function onSortTypeComboBoxChanged(event:IndexChangeEvent):void
+			{
+				this._curPage = 1;
+				fetchVideo();				
 			}
 			
 		]]>
@@ -110,15 +120,26 @@
 		<s:HGroup width="50%" height="100%" paddingLeft="6" verticalAlign="middle">
 			<s:TextInput id="_codeInput"/>
 			<s:Button label="搜索车号" click="onCodeSearch(event)"/>
+			<s:ComboBox id="_sortTypeComboBox" width="86" change="onSortTypeComboBoxChanged(event)"
+						initialize="_sortTypeComboBox.textInput.editable=false" selectedIndex="0">
+				<s:ArrayCollection>
+					<fx:String>按评分降序</fx:String>
+					<fx:String>按评分升序</fx:String>
+					<fx:String>按日期降序</fx:String>
+					<fx:String>按日期升序</fx:String>
+					<fx:String>按番号降序</fx:String>
+					<fx:String>按番号升序</fx:String>
+				</s:ArrayCollection>
+			</s:ComboBox>
 		</s:HGroup>
 		<s:HGroup width="50%" height="100%" horizontalAlign="right" paddingRight="6"
 				  verticalAlign="middle">
 			<s:Button label="前一页" click="onPrevPage(event)"/>
 			<s:Button label="后一页" click="onNextPage(event)"/>
-			<s:Label text="{this._curPage}/{this._totalPage}" verticalAlign="middle" height="100%"/>
+			<s:Label height="100%" text="{this._curPage}/{this._totalPage}" verticalAlign="middle"/>
 		</s:HGroup>
 	</s:HGroup>
 	<s:Scroller width="100%" height="100%">
-		<s:TileGroup id="_container" width="100%" height="100%" paddingRight="6" paddingLeft="6"/>
+		<s:TileGroup id="_container" width="100%" height="100%" paddingLeft="6" paddingRight="6"/>
 	</s:Scroller>
 </s:VGroup>

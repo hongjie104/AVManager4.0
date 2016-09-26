@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:VGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		  xmlns:s="library://ns.adobe.com/flex/spark" 
+		  xmlns:mx="library://ns.adobe.com/flex/mx" width="400" height="300">
+	<fx:Script>
+		<![CDATA[
+			import com.avManager.model.Config;
+			
+			import mx.collections.ArrayCollection;
+			
+			import org.libra.utils.MathUtil;
+			
+			[Bindable]
+			private var _data:ArrayCollection = new ArrayCollection();
+			
+			private var _videoCode:String = null;
+
+
+			public function set videoCode(value:String):void
+			{
+				_videoCode = value;
+			}
+
+			protected function onFetch(event:MouseEvent):void
+			{
+				if(_videoCode){
+					var loader:URLLoader = new URLLoader();
+					loader.addEventListener(Event.COMPLETE, onLoadHtml);
+					loader.load(new URLRequest(Config.instance.webURL + "/" + _videoCode));
+				}
+			}
+			
+			private function onLoadHtml(evt:Event):void{
+				var gid:String = "";
+				var uc:String = "";
+				var img:String = "";
+				
+				var loader:URLLoader = evt.target as URLLoader;
+				loader.removeEventListener(Event.COMPLETE, onLoadHtml);
+				
+				var result:Array = (/var gid = \d+/).exec(loader.data);
+				if(result && result.length > 0) {
+					gid = result[0].toString().replace("var gid = ", "");
+					result = (/var uc = \d+/).exec(loader.data);
+					if(result && result.length > 0) {
+						uc = result[0].toString().replace("var uc = ", "");
+						result = (/var img = '.*'/).exec(loader.data);
+						if(result && result.length > 0) {
+							img = result[0].toString().replace("var img = '", "").replace("'", "");
+							
+							loader.addEventListener(Event.COMPLETE, onLoadMagnet);
+							// "https://www.javbus5.com/ajax/uncledatoolsbyajax.php?gid=32451078852&lang=zh&img=https://pics.javbus.info/cover/5p4b_b.jpg&uc=0&floor=359"
+							trace(Config.instance.webURL + "/ajax/uncledatoolsbyajax.php?gid=" + gid + "&lang=zh&img=" + img + "&uc=" + uc + "&floor=" + MathUtil.random(100, 999));
+							loader.load(new URLRequest(Config.instance.webURL + "/ajax/uncledatoolsbyajax.php?gid=" + gid + "&lang=zh&img=" + img + "&uc=" + uc + "&floor=" + Math.floor(MathUtil.random(100, 999))));
+						}
+					}
+				}
+			}
+			
+			private function onLoadMagnet(evt:Event):void{
+				var loader:URLLoader = evt.target as URLLoader;
+				loader.removeEventListener(Event.COMPLETE, onLoadMagnet);
+				
+//				var html:String = loader.data;
+				if(loader.data.indexOf("暫時沒有磁力連結") == -1){
+					var arr:Array = (/<a style="color:#333" rel="nofollow".*>/).exec(loader.data);
+//					var arr:Array = (/\[ZEX-004\]/).exec(loader.data);
+					trace(arr);
+				} else {
+					
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	<s:Button label="获取磁链接" click="onFetch(event)"/>
+	<s:DataGrid width="100%" dataProvider="{_data}">
+		<s:columns>
+			<s:ArrayList>
+				<s:GridColumn dataField="name" headerText="磁力名称"></s:GridColumn>
+				<s:GridColumn dataField="size" headerText="文件大小" width="70"></s:GridColumn>
+				<s:GridColumn dataField="date" headerText="分享日期" width="70"></s:GridColumn>
+				<s:GridColumn headerText="复制磁链接" width="76">
+					<s:itemRenderer>  
+						<fx:Component>  
+							<s:GridItemRenderer>  
+								<s:layout>  
+									<s:HorizontalLayout horizontalAlign="center"/>  
+								</s:layout>  
+								
+								<fx:Script>
+									<![CDATA[
+										protected function onCopy(event:MouseEvent, data:Object):void
+										{
+											System.setClipboard(data.url);
+										}
+									]]>
+								</fx:Script>
+								
+								<s:Button label="复制" click="onCopy(event, data)"/>  
+							</s:GridItemRenderer>  
+						</fx:Component>  
+					</s:itemRenderer> 
+				</s:GridColumn>
+			</s:ArrayList>
+		</s:columns>
+	</s:DataGrid>
+</s:VGroup>

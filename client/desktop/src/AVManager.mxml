@@ -8,15 +8,16 @@
 					   creationComplete="onWindowedapplicationCreationCompleted(event)" xmlns:dataAnalysis="com.avManager.view.dataAnalysis.*">
 	<fx:Script>
 		<![CDATA[
+			import com.avManager.API;
+			import com.avManager.Net;
+			import com.avManager.model.Config;
+			import com.avManager.view.config.ConfigWin;
+			
 			import flash.utils.describeType;
 			
 			import mx.events.FlexEvent;
 			import mx.events.MenuEvent;
 			
-			import com.avManager.API;
-			import com.avManager.Net;
-			import com.avManager.model.Config;
-			import com.avManager.view.config.ConfigWin;
 			import org.libra.flex.utils.PopUpUtil;
 			
 			protected function munuItemClickHandler(event:MenuEvent):void {
@@ -28,14 +29,102 @@
 			}
 			
 			private function test(...args):void {
-//				var loader:URLLoader = new URLLoader();
-//				loader.load(new URLRequest("http://127.0.0.1:3630/actress"));
-//				loader.addEventListener(Event.COMPLETE, onLoaded);
-				Net.instance.fetch(API.getActress(2, "001dce0230ba5c382e5c0000"), this.onLoaded);
+				var loader:URLLoader = new URLLoader();
+				loader.load(new URLRequest("https://www.javbus5.com/ajax/uncledatoolsbyajax.php?gid=32451078852&lang=zh&img=https://pics.javbus.info/cover/5p4b_b.jpg&uc=0&floor=359"));
+				loader.addEventListener(Event.COMPLETE, onLoaded);
+//				Net.instance.fetch(API.getActress(2, "001dce0230ba5c382e5c0000"), this.onLoaded);
 			}
 			
-			private function onLoaded(data:Object):void{
-				trace(data);
+			private function onLoaded(data:Event):void{
+				trace((data.target as URLLoader).data);
+				
+				/*
+				[SWF] AVManager.swf - 解压缩后为 4,858,672 个字节
+				
+				
+				<tr onmouseover="this.style.backgroundColor='#F4F9FD';this.style.cursor='pointer';" onmouseout="this.style.backgroundColor='#FFFFFF'" height="35px" style=" border-top:#DDDDDD solid 1px">
+				
+				<td width="70%" onclick="window.open('magnet:?xt=urn:btih:3D0C7F4D189FC4458453576779B7A707A5B80A7A&dn=STAR-715-AVI','_self')">
+				
+				<a style="color:#333" rel="nofollow" title="滑鼠右鍵點擊並選擇【複製連結網址】" href="magnet:?xt=urn:btih:3D0C7F4D189FC4458453576779B7A707A5B80A7A&dn=STAR-715-AVI">
+				
+				STAR-715-AVI                 	</a>
+				
+				</td>
+				
+				<td style="text-align:center;white-space:nowrap" onclick="window.open('magnet:?xt=urn:btih:3D0C7F4D189FC4458453576779B7A707A5B80A7A&dn=STAR-715-AVI','_self')">
+				
+				<a style="color:#333" rel="nofollow" title="滑鼠右鍵點擊並選擇【複製連結網址】" href="magnet:?xt=urn:btih:3D0C7F4D189FC4458453576779B7A707A5B80A7A&dn=STAR-715-AVI">
+				
+				2.09GB                	</a>
+				
+				</td>
+				
+				<td style="text-align:center;white-space:nowrap" onclick="window.open('magnet:?xt=urn:btih:3D0C7F4D189FC4458453576779B7A707A5B80A7A&dn=STAR-715-AVI','_self')">
+				
+				<a style="color:#333" rel="nofollow" title="滑鼠右鍵點擊並選擇【複製連結網址】" href="magnet:?xt=urn:btih:3D0C7F4D189FC4458453576779B7A707A5B80A7A&dn=STAR-715-AVI">
+				
+				2016-09-22                	</a>
+				
+				</td>            
+				
+				</tr>
+				
+				
+				
+				<tr onmouseover="this.style.backgroundColor='#F4F9FD';this.style.cursor='pointer';" onmouseout="this.style.backgroundColor='#FFFFFF'" height="35px" style=" border-top:#DDDDDD solid 1px">
+				
+				<td width="70%" onclick="window.open('magnet:?xt=urn:btih:D442D432335E557486B589576D036BCC0B14B6A9&dn=0921-javbo.net_star-715','_self')">
+				
+				<a style="color:#333" rel="nofollow" title="滑鼠右鍵點擊並選擇【複製連結網址】" href="magnet:?xt=urn:btih:D442D432335E557486B589576D036BCC0B14B6A9&dn=0921-javbo.net_star-715">
+				
+				0921-javbo.net_star-715                 	</a>
+				
+				</td>
+				
+				<td style="text-align:center;white-space:nowrap" onclick="window.open('magnet:?xt=urn:btih:D442D432335E557486B589576D036BCC0B14B6A9&dn=0921-javbo.net_star-715','_self')">
+				
+				<a style="color:#333" rel="nofollow" title="滑鼠右鍵點擊並選擇【複製連結網址】" href="magnet:?xt=urn:btih:D442D432335E557486B589576D036BCC0B14B6A9&dn=0921-javbo.net_star-715">
+				
+				1.68GB                	</a>
+				
+				</td>
+				
+				<td style="text-align:center;white-space:nowrap" onclick="window.open('magnet:?xt=urn:btih:D442D432335E557486B589576D036BCC0B14B6A9&dn=0921-javbo.net_star-715','_self')">
+				
+				<a style="color:#333" rel="nofollow" title="滑鼠右鍵點擊並選擇【複製連結網址】" href="magnet:?xt=urn:btih:D442D432335E557486B589576D036BCC0B14B6A9&dn=0921-javbo.net_star-715">
+				
+				2016-09-21                	</a>
+				
+				</td>            
+				
+				</tr>
+				
+				
+				
+				<script type="text/javascript">
+				
+				$('#movie-loading').hide();
+				
+				</script>
+				
+				
+				
+				
+				[SWF] AVManager.swf - 解压缩后为 4,858,674 个字节
+				<tr style="color:#555;"><td colspan="4">暫時沒有磁力連結,請等待網友分享!</td></tr>
+				
+				
+				
+				<script type="text/javascript">
+				
+				$('#movie-loading').hide();
+				
+				</script>
+				
+				
+
+				*/
 			}
 			
 			protected function onWindowedapplicationClosing(event:Event):void
@@ -92,7 +181,7 @@
 			</s:NavigatorContent>
 			<s:NavigatorContent width="100%" height="100%" label="演员">
 				<s:VGroup width="100%" height="100%">
-					<!--<actress:ActressContainer/>-->
+					<actress:ActressContainer/>
 				</s:VGroup>
 			</s:NavigatorContent>
 			<s:NavigatorContent width="100%" height="100%" label="演员统计">

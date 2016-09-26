@@ -115,6 +115,19 @@ package com.avManager.model.data
 		{
 			_alias = value;
 		}
+		
+		override public function createWithJson(json:Object):void {
+			super.createWithJson(json);
+			alias = json.alias;
+			birthday = new Date(json.birthday);
+			height = json.height;
+			bust = json.bust;
+			score = json.score;
+			waist = json.waist;
+			hip = json.hip;
+			cup = json.cup;
+			javBusCode = json.javBusCode;
+		}
 
 	}
 }

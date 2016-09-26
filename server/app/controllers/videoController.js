@@ -7,42 +7,37 @@ let jsonUtil     = require('../utils/jsonUtil');
 let mongoose     = require('mongoose');
 
 exports.getVideo = function *() {
-	let targetID = this.params.targetID;
-	if (typeof(targetID) !== "string" || targetID.length !== 24) {
-		targetID = "000000000000000000000000";
-	}
-	targetID = mongoose.Types.ObjectId(targetID);
+	const startIndex = numberUtil.toInt(this.params.startIndex);
 	const count = numberUtil.toInt(this.params.count);
-	const isNext = numberUtil.toInt(this.params.isNext) === 1;
+	const sortType = numberUtil.toInt(this.params.sortType);
+	const keyWord = jsonUtil.myDecodeURIComponent(this.params.keyWord);
 
-	let videoes = isNext ? yield VideoModel.find({_id: {$gt: targetID}}).limit(count) : yield VideoModel.find({_id: {$lt: targetID}}).limit(count).sort({_id: -1});
-	if (!isNext) {
-		videoes = videoes.reverse();
+	let condition = {};
+	if (keyWord !== "!") {
+		condition.code = {$regex: keyWord.toUpperCase()};
 	}
-	const totalCount = yield VideoModel.count();
+	let sortCondition = {};
+	if (sortType === 1) {
+		// 按照评分排序从大到小排序
+		sortCondition.score = -1;
+	} else if (sortType === 2) {
+		// 按照评分排序从小到大排序
+		sortCondition.score = 1;
+	} else if (sortType === 3) {
+		// 按照生成日期排序从大到小排序
+		sortCondition.date = -1;
+	} else if (sortType === 4) {
+		// 按照生成日期排序从小到大排序
+		sortCondition.date = 1;
+	} else if (sortType === 5) {
+		// 按照番号排序从大到小排序
+		sortCondition.code = -1;
+	} else if (sortType === 6) {
+		// 按照番号排序从小到大排序
+		sortCondition.code = 1;
+	}
+
+	let videoes = yield VideoModel.find(condition).sort(sortCondition).limit(count).skip(startIndex);
+	const totalCount = yield VideoModel.count(condition);
 	this.body = jsonUtil.createAPI(1, {video: jsonUtil.videoes2Json(videoes), count: totalCount});
-};
-
-exports.searchCode = function *() {
-	let code = this.params.code;
-	let targetID = this.params.targetID;
-	if (typeof(targetID) !== "string" || targetID.length !== 24) {
-		targetID = "000000000000000000000000";
-	}
-	targetID = mongoose.Types.ObjectId(targetID);
-	const count = numberUtil.toInt(this.params.count);
-	const isNext = numberUtil.toInt(this.params.isNext) === 1;
-
-	let result = [];
-	let totalCount = 0;
-	if (code !== "") {
-		let videoes = isNext ? yield VideoModel.find({code: {$regex: code.toUpperCase()}, _id: {$gt: targetID}}).limit(count) : yield VideoModel.find({code: {$regex: code.toUpperCase()}, _id: {$lt: targetID}}).limit(count).sort({_id: -1});
-		if (!isNext) {
-			videoes = videoes.reverse();
-		}
-		result = jsonUtil.videoes2Json(videoes);
-
-		totalCount = yield VideoModel.count({code: {$regex: code.toUpperCase()}});
-	}
-	this.body = jsonUtil.createAPI(1, {video: result, count: totalCount});
 };

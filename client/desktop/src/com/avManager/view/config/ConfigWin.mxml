@@ -2,7 +2,8 @@
 <s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009"
 			   xmlns:s="library://ns.adobe.com/flex/spark"
 			   xmlns:mx="library://ns.adobe.com/flex/mx"
-			   width="400" height="300" close="onCloseHandler(event)" title="设置" creationComplete="onTitlewindowCreationCompleted(event)">
+			   width="400" height="300" close="onCloseHandler(event)"
+			   creationComplete="onTitlewindowCreationCompleted(event)" title="设置">
 	<fx:Script>
 		<![CDATA[
 			import com.adobe.serialization.json.JSONDecoder;
