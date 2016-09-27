@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<s:VGroup xmlns:fx="http://ns.adobe.com/mxml/2009" 
-		  xmlns:s="library://ns.adobe.com/flex/spark" 
-		  xmlns:mx="library://ns.adobe.com/flex/mx" width="400" height="300">
+<s:VGroup xmlns:fx="http://ns.adobe.com/mxml/2009"
+		  xmlns:s="library://ns.adobe.com/flex/spark"
+		  xmlns:mx="library://ns.adobe.com/flex/mx"
+		  width="400" height="100">
 	<fx:Script>
 		<![CDATA[
 			import com.avManager.model.Config;
@@ -50,7 +51,6 @@
 							
 							loader.addEventListener(Event.COMPLETE, onLoadMagnet);
 							// "https://www.javbus5.com/ajax/uncledatoolsbyajax.php?gid=32451078852&lang=zh&img=https://pics.javbus.info/cover/5p4b_b.jpg&uc=0&floor=359"
-							trace(Config.instance.webURL + "/ajax/uncledatoolsbyajax.php?gid=" + gid + "&lang=zh&img=" + img + "&uc=" + uc + "&floor=" + MathUtil.random(100, 999));
 							loader.load(new URLRequest(Config.instance.webURL + "/ajax/uncledatoolsbyajax.php?gid=" + gid + "&lang=zh&img=" + img + "&uc=" + uc + "&floor=" + Math.floor(MathUtil.random(100, 999))));
 						}
 					}
@@ -61,11 +61,16 @@
 				var loader:URLLoader = evt.target as URLLoader;
 				loader.removeEventListener(Event.COMPLETE, onLoadMagnet);
 				
-//				var html:String = loader.data;
 				if(loader.data.indexOf("暫時沒有磁力連結") == -1){
-					var arr:Array = (/<a style="color:#333" rel="nofollow".*>/).exec(loader.data);
-//					var arr:Array = (/\[ZEX-004\]/).exec(loader.data);
-					trace(arr);
+					var arr:Array = loader.data.match(/<a style="color:#333" rel="nofollow".*>\r*\n*.*<\/a>/g);
+					for(var i:int = 0; i < arr.length; i += 3) {
+						_data.addItem({
+							"name":arr[i].toString().replace(/<a.*">/, "").replace(/\r*\n*\s*\t*/g, "").replace("</a>", ""),
+							"size":arr[i + 1].toString().replace(/<a.*">/, "").replace(/\r*\n*\s*\t*/g, "").replace("</a>", ""),
+							"date":arr[i + 2].toString().replace(/<a.*">/, "").replace(/\r*\n*\s*\t*/g, "").replace("</a>", ""),
+							"url":arr[i].toString().match(/href=".*"/)[0].toString().replace("href=\"", "").replace("\"", "")
+						});
+					}
 				} else {
 					
 				}
@@ -77,13 +82,13 @@
 		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
 	</fx:Declarations>
 	<s:Button label="获取磁链接" click="onFetch(event)"/>
-	<s:DataGrid width="100%" dataProvider="{_data}">
+	<s:DataGrid width="100%" height="100%" dataProvider="{_data}" verticalScrollPolicy="auto">
 		<s:columns>
 			<s:ArrayList>
 				<s:GridColumn dataField="name" headerText="磁力名称"></s:GridColumn>
-				<s:GridColumn dataField="size" headerText="文件大小" width="70"></s:GridColumn>
-				<s:GridColumn dataField="date" headerText="分享日期" width="70"></s:GridColumn>
-				<s:GridColumn headerText="复制磁链接" width="76">
+				<s:GridColumn width="70" dataField="size" headerText="文件大小"></s:GridColumn>
+				<s:GridColumn width="70" dataField="date" headerText="分享日期"></s:GridColumn>
+				<s:GridColumn width="76" headerText="复制磁链接">
 					<s:itemRenderer>  
 						<fx:Component>  
 							<s:GridItemRenderer>  
@@ -107,5 +112,5 @@
 				</s:GridColumn>
 			</s:ArrayList>
 		</s:columns>
-	</s:DataGrid>
+	</s:DataGrid>	
 </s:VGroup>

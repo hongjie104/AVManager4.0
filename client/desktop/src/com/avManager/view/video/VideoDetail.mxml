@@ -2,8 +2,9 @@
 <s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009"
 			   xmlns:s="library://ns.adobe.com/flex/spark"
 			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   xmlns:video="com.avManager.view.video.*"
 			   width="1200" height="618" close="onCloseHandler(event)"
-			   creationComplete="onCreationCompleted(event)" xmlns:video="com.avManager.view.video.*">
+			   creationComplete="onCreationCompleted(event)">
 	<fx:Script>
 		<![CDATA[
 			import com.avManager.API;
@@ -16,6 +17,7 @@
 			import mx.events.CloseEvent;
 			import mx.events.FlexEvent;
 			
+			import org.libra.flex.utils.NativeProcessUtil;
 			import org.libra.flex.utils.PopUpUtil;
 			import org.libra.utils.DateUtil;
 			
@@ -95,6 +97,44 @@
 			private function onFetchSeries(series:Object):void{
 				_seriesLabel.text = series.name;				
 			}
+			
+			private function onOpen(evt:Event):void{
+				var pathArr:Array = Config.getVideoPath();
+				var f:File;
+				for each(var p:String in pathArr) {
+					f = new File(p + "\\" + video.code);
+					if(f.exists && f.isDirectory) {
+						NativeProcessUtil.runCMD("start", f.nativePath, "/max");		
+						break;
+					}
+				}
+			}
+			
+			private function onPlay(evt:Event):void{
+				var pathArr:Array = Config.getVideoPath();
+				var formatArr:Array = Config.getVideoFormat();
+				var f:File;
+				var exists:Boolean = false;
+				for each(var p:String in pathArr) {
+					for each(var format:String in formatArr){
+						f = new File(p + "\\" + video.code + "\\" + video.code + "." + format);
+						if(f.exists) {
+							f.openWithDefaultApplication();
+							exists = true;
+							break;
+						}
+					}
+					if(exists){
+						break;
+					}
+				}
+			}
+			
+			protected function onAddActress(event:MouseEvent):void
+			{
+				
+			}
+			
 		]]>
 	</fx:Script>
 	<fx:Declarations>
@@ -130,13 +170,20 @@
 				<s:Label id="_scoreLabel" width="20" text="36"/>
 			</s:HGroup>
 			<s:VGroup width="100%">
-				<s:Label width="70" fontWeight="bold" text="女司机:" textAlign="left"/>
+				<s:HGroup width="100%" verticalAlign="middle">
+					<s:Label width="70" fontWeight="bold" text="女司机:" textAlign="left"/>
+					<s:Button label="添加女司机" click="onAddActress(event)"/>
+				</s:HGroup>
 				<s:Scroller width="100%" height="296">
 					<s:TileGroup id="_actressContainer" width="387" horizontalGap="4"
 								 orientation="rows"/>	
 				</s:Scroller>
 			</s:VGroup>
-			<video:MagnetContainer width="100%" id="_magnetContainer"/>
+			<video:MagnetContainer id="_magnetContainer" width="100%" height="114"/>
+			<s:HGroup width="100%" gap="60" horizontalAlign="center" verticalAlign="middle">
+				<s:Button label="打开文件夹" click="onOpen(event)"/>
+				<s:Button label="播放影片" click="onPlay(event)"/>
+			</s:HGroup>
 		</s:VGroup>
 	</s:HGroup>
 </s:TitleWindow>

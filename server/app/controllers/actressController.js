@@ -57,3 +57,20 @@ exports.getActressedByID = function *() {
 		this.body = jsonUtil.createAPI(1, jsonUtil.actresses2Json(actresses));
 	}
 };
+
+exports.getActressedByName = function *() {
+	const name = jsonUtil.myDecodeURIComponent(this.params.name);
+	const startIndex = numberUtil.toInt(this.params.startIndex);
+	const count = numberUtil.toInt(this.params.count);
+
+	let condition = {};
+	if (name !== "!") {
+		condition.$or = [
+			{name: {$regex: name}},
+			{alias: {$regex: name}}
+		];
+	}
+	let actresses = yield ActressModel.find(condition).limit(count).skip(startIndex);
+	const totalCount = yield ActressModel.count(condition);
+	this.body = jsonUtil.createAPI(1, {actress: jsonUtil.actresses2Json(actresses), count: totalCount});
+};

@@ -18,7 +18,13 @@ router.get('getActress/:startIndex/:count/:sortType/:keyWord', actressController
 
 router.get('getActressedByID/:id', actressController.getActressedByID);
 
+router.get('getActressedByName/:name/:startIndex/:count', actressController.getActressedByName);
+
 router.get('getVideo/:startIndex/:count/:sortType/:keyWord', videoController.getVideo);
+
+router.get('addVideo/:code/:name/:date/:actress/:series/:category', videoController.addVideo)
+
+router.get('addActressToVideo/:id/:actress', videoController.addActressToVideo);
 
 router.get('getCategoryByID/:id', categoryController.getCategoryByID);
 
