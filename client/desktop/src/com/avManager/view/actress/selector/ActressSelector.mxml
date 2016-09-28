@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009"
+			   xmlns:s="library://ns.adobe.com/flex/spark"
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   width="1053" height="618" close="onCloseHandler(event)"
+			   creationComplete="onCreationCompleted(event)">
+	<fx:Script>
+		<![CDATA[
+			import com.avManager.API;
+			import com.avManager.Net;
+			import com.avManager.model.data.Actress;
+			
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			
+			import org.libra.flex.utils.PopUpUtil;
+			import org.libra.utils.text.StringUtil;
+			
+			private static const _COUNT:int = 24;
+			
+			[Bindable]
+			private var _curPage:int = 1;
+			
+			[Bindable]
+			private var _totalPage:int = 0;
+			
+			private var _totalCount:int = 0;
+			
+			private var _selectedCell:ActressSelectorCell;
+			
+			public function set onSelectedActressHandler(value:Function):void
+			{
+				_onSelectedActressHandler = value;
+			}
+
+			private var _onSelectedActressHandler:Function;
+			
+			protected function onSearch(event:MouseEvent = null):void
+			{
+				var key:String = _keyWordInput.text;
+				if(StringUtil.isNullOrEmpty(key)) {
+					key = "!";
+				}
+				Net.instance.fetch(API.getActressedByName(key, (_curPage - 1) * _COUNT, _COUNT), this.onFetchActress);
+			}
+			
+			private function onFetchActress(data:Object):void{
+				_totalPage = data.count;
+				_totalCount = data.count;
+				_totalPage = Math.ceil(_totalCount / _COUNT);
+				
+				var actressObjArr:Array = data.actress;
+				var actress:Actress;
+				for(var i:int = 0; i < actressObjArr.length; i++) {
+					actress = new Actress();
+					actress.createWithJson(actressObjArr[i]);
+					(_container.getElementAt(i) as ActressSelectorCell).actress = actress;
+				}
+				for(; i < _COUNT; i++){
+					(_container.getElementAt(i) as ActressSelectorCell).actress = null;
+				}
+			}
+			
+			protected function onCreationCompleted(event:FlexEvent):void
+			{
+				var actressCell:ActressSelectorCell;
+				for(var i:int = 0; i < _COUNT; i++){
+					actressCell = new ActressSelectorCell();
+					_container.addElement(actressCell);
+					actressCell.addEventListener(MouseEvent.CLICK, onActressCellClikced);
+				}
+			}
+			
+			private function onActressCellClikced(evt:MouseEvent):void{
+				var a:ActressSelectorCell = evt.currentTarget as ActressSelectorCell;
+				if(a.isVisible){
+					if(_selectedCell){
+						_selectedCell.isSelected = false;
+						_selectedCell = null;
+					}
+					a.isSelected = !a.isSelected;
+					if(a.isSelected){
+						_selectedCell = a;
+					}	
+				}
+			}
+			
+			private function onCloseHandler(event:CloseEvent = null):void {
+				PopUpUtil.instance.removePopUp(this, 1);
+				
+				for(var i:int = 0; i < _container.numElements; i++){
+					_container.getElementAt(i).removeEventListener(MouseEvent.CLICK, onActressCellClikced);	
+				}
+			}
+			
+			protected function onAddActress(event:MouseEvent):void
+			{
+				if(_onSelectedActressHandler != null){
+					if(_selectedCell){
+						_onSelectedActressHandler.call(this, _selectedCell.actress);	
+					}
+				}
+				onCloseHandler();
+			}
+			
+			protected function onPrevPage(event:MouseEvent):void
+			{
+				if(this._curPage > 1){
+					this._curPage--;
+					onSearch();
+				}
+				
+			}
+			
+			protected function onNextPage(event:MouseEvent):void
+			{
+				if(this._curPage < this._totalPage) {
+					this._curPage++;
+					onSearch();
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	<s:VGroup width="100%" height="100%">
+		<s:HGroup width="100%" height="26" paddingLeft="6" paddingRight="6" verticalAlign="middle">
+			<s:Label text="关键字:"/>
+			<s:TextInput id="_keyWordInput"/>
+			<s:Button label="搜索" click="onSearch(event)"/>
+			<s:HGroup width="100%" height="26" horizontalAlign="right" verticalAlign="middle">
+				<s:Button label="前一页" click="onPrevPage(event)"/>
+				<s:Button label="后一页" click="onNextPage(event)"/>
+				<s:Label height="100%" text="{this._curPage}/{this._totalPage}" textAlign="center"
+						 verticalAlign="middle"/>
+			</s:HGroup>
+		</s:HGroup>
+		<s:Scroller width="100%" height="100%">
+			<s:TileGroup id="_container" width="100%" height="100%"/>	
+		</s:Scroller>
+		<s:HGroup width="100%" height="40" horizontalAlign="center" verticalAlign="middle">
+			<s:Button label="添加" click="onAddActress(event)"/>
+		</s:HGroup>
+	</s:VGroup>
+</s:TitleWindow>

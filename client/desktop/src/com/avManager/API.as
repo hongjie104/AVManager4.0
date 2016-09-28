@@ -21,9 +21,22 @@ package com.avManager
 		}
 		
 		public static function addVideo(code:String, name:String, date:String, actressName:Vector.<String>, category:Vector.<String>, series:String = "undefined"):String{
-			return getLocalServer() + "/addVideo/" + code + "/" + name + "/" + date + "/" + actressName.join("&") + "/" + category.join("&") + "/" + series;
+			var actressNameStr:String = actressName.join("&");
+			if(StringUtil.isNullOrEmpty(actressNameStr)){
+				actressNameStr = "!";
+			}
+			return getLocalServer() + "/addVideo/" + code + "/" + name + "/" + date + "/" + actressNameStr + "/" + category.join("&") + "/" + series;
 		}
 		
+		public static function addActressToVideo(videoID:String, actressName:String):String{
+			return getLocalServer() + "/addActressToVideo/" + videoID + "/" + actressName;
+		}
+		
+		public static function filterVideoCode(codeList:Vector.<String>):String{
+			return getLocalServer() + "/filterVideoCode/" + codeList.join('&');
+		}
+		
+		//----------------------actress
 		public static function getActress(startIndex:int, count:int, sortType:int = 1, keyWord:String = "!"):String {
 			return getLocalServer() + "/getActress/" + MathUtil.max(0, startIndex) + "/" + MathUtil.max(0, count) + "/" + sortType + "/" + encodeURIComponent(keyWord);
 		}
@@ -38,6 +51,21 @@ package com.avManager
 		
 		public static function getActressedByName(name:String, startIndex:int, count:int):String{
 			return getLocalServer() + "/getActressedByName/" + encodeURIComponent(name) + "/" + startIndex + "/" + count;
+		}
+		
+		public static function getActresVideo(actressID:String, sortType:int, startIndex:int, count:int):String{
+			return getLocalServer() + "/getActresVideo/" + actressID + "/" + sortType + "/" + startIndex + "/" + count;
+		}
+		
+		public static function modifyActress(id:String, alias:String, birthday:Date, height:int, bust:int, waist:int, hip:int, cup:String, score:int):String{
+			if(StringUtil.isNullOrEmpty(alias)){
+				alias = "!";
+			}
+			var birthdayStr:String = DateUtil.toString(birthday);
+			var arr:Array = birthdayStr.split('-');
+			arr[1] = int(arr[1]) - 1;
+			birthdayStr = arr.join('-');
+			return getLocalServer() + "/modifyActress/" + id + "/" + encodeURIComponent(alias) + "/" + birthdayStr + "/" + height + "/" + bust + "/" + waist + "/" + hip + "/" + cup + "/" + score;
 		}
 		
 		public static function getCategoryByID(ids:Vector.<String>):String{

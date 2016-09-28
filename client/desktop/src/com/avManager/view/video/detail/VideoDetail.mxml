@@ -4,7 +4,7 @@
 			   xmlns:mx="library://ns.adobe.com/flex/mx"
 			   xmlns:video="com.avManager.view.video.*"
 			   width="1200" height="618" close="onCloseHandler(event)"
-			   creationComplete="onCreationCompleted(event)">
+			   creationComplete="onCreationCompleted(event)" xmlns:detail="com.avManager.view.video.detail.*">
 	<fx:Script>
 		<![CDATA[
 			import com.avManager.API;
@@ -12,7 +12,8 @@
 			import com.avManager.model.Config;
 			import com.avManager.model.data.Actress;
 			import com.avManager.model.data.Video;
-			import com.avManager.view.actress.ActressCell;
+			import com.avManager.view.actress.container.ActressCell;
+			import com.avManager.view.actress.selector.ActressSelector;
 			
 			import mx.events.CloseEvent;
 			import mx.events.FlexEvent;
@@ -132,7 +133,23 @@
 			
 			protected function onAddActress(event:MouseEvent):void
 			{
+				var actressSelector:ActressSelector = new ActressSelector();
+				actressSelector.onSelectedActressHandler = this.onSelectedActress;
+				PopUpUtil.instance.addPopUp(actressSelector, this, true, 1);
+			}
+			
+			private function onSelectedActress(actress:Actress):void{
+				Net.instance.fetch(API.addActressToVideo(_video.id, actress.name), onAddedActress);
+			}
+			
+			private function onAddedActress(actressObj:Object):void{
+				var actress:Actress = new Actress();
+				actress.createWithJson(actressObj);
+				var actressCell:ActressCell = new ActressCell();
+				actressCell.actress = actress;
+				_actressContainer.addElement(actressCell);
 				
+				video.actress.push(actress.id);
 			}
 			
 		]]>
@@ -179,7 +196,7 @@
 								 orientation="rows"/>	
 				</s:Scroller>
 			</s:VGroup>
-			<video:MagnetContainer id="_magnetContainer" width="100%" height="114"/>
+			<detail:MagnetContainer id="_magnetContainer" width="100%" height="114"/>
 			<s:HGroup width="100%" gap="60" horizontalAlign="center" verticalAlign="middle">
 				<s:Button label="打开文件夹" click="onOpen(event)"/>
 				<s:Button label="播放影片" click="onPlay(event)"/>

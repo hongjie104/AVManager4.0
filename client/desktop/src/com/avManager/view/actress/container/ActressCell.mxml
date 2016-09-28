@@ -37,7 +37,7 @@
 
 			protected function onCreationCompleted(event:FlexEvent):void
 			{
-				
+				this.visible = _actress ? true : false;
 			}
 			
 		]]>

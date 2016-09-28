@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009"
+			   xmlns:s="library://ns.adobe.com/flex/spark"
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   width="800" height="600" close="onCloseHandler(event)"
+			   creationComplete="onCreationCompleted(event)">
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.images.JPGEncoder;
+			import com.avManager.API;
+			import com.avManager.Net;
+			import com.avManager.Utils;
+			import com.avManager.model.Config;
+			
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			
+			import org.libra.flex.utils.PopUpUtil;
+			import org.libra.utils.FileUtil;
+			
+			private var _curPage:int = 1;
+			
+			private var _loader:URLLoader = new URLLoader();
+			
+			// 等待获取数据的影片
+			private var _toFetchVideoList:Vector.<ToFetchVideoData> = new Vector.<ToFetchVideoData>();
+			
+			// 正在获取的硬盘索引值
+			private var _curVideoIndex:int = 0;
+			
+			private var _totalVideoCount:int = 0;
+			
+			private var _curToFetchVideoData:ToFetchVideoData;
+			
+			private var _isFetching:Boolean = false;
+			
+			private var _isWillStop:Boolean = false;
+			
+			protected function onCreationCompleted(event:FlexEvent):void
+			{
+				_loader.addEventListener(Event.COMPLETE, onFetchPageHtml);
+			}
+			
+			private function onCloseHandler(event:CloseEvent = null):void {
+				PopUpUtil.instance.removePopUp(this, 1);
+			}
+			
+			protected function onBeginFetch(event:MouseEvent):void
+			{
+				if(!_isFetching){
+					_isWillStop = false;
+					_isFetching = true;
+					fetchPageHtml();
+				}
+			}
+			
+			private function onStopFetch(evt:MouseEvent):void{
+				_isWillStop = true;
+			}
+			
+			private function reset():void{
+				_curVideoIndex = 0;
+				_totalVideoCount = 0;
+				_curToFetchVideoData = null;
+			}
+			
+			private function fetchPageHtml():void{
+				_textArea.appendText("开始获取第" + _curPage + "页数据\n");
+				var r:URLRequest = new URLRequest(Config.instance.webURL + "/page/" + _curPage);
+				r.requestHeaders = new Array(new URLRequestHeader("Cookie", "existmag=all"));
+				r.manageCookies = false;
+				_loader.load(r);
+			}
+			
+			private function onFetchPageHtml(evt:Event):void{
+				_toFetchVideoList.length = 0;
+				var codeList:Vector.<String> = new Vector.<String>();
+				var toFetchVideoData:ToFetchVideoData = null;
+				var videoHtmlArr:Array = evt.target.data.match(/<a class="movie-box".*\s*<div class="photo-frame">\s*.*/g);
+				if(videoHtmlArr.length == 0){
+					_isFetching = false;
+					reset();
+					Alert.show("全部搞定了");
+				} else {
+					for each(var s:String in videoHtmlArr){
+						toFetchVideoData = new ToFetchVideoData();
+						toFetchVideoData.code = s.match(/<a class="movie-box".*/)[0].toString().replace('<a class="movie-box" href="', "").replace('">', "").replace(Config.instance.webURL + "/", "");
+						toFetchVideoData.imgSUrl = s.match(/<img src=".*" /)[0].toString().replace('<img src="', '').replace('" ', '');
+						_toFetchVideoList.push(toFetchVideoData);
+						codeList.push(toFetchVideoData.code);
+					}
+					// 拿到了本页所有影片的番号和小图url，然后问一下服务器，把已经存在的番号给过滤掉
+					Net.instance.fetch(API.filterVideoCode(codeList), this.onFilterVideoCode);	
+				}
+			}
+			
+			private function onFilterVideoCode(codeArr:Array):void{
+				_totalVideoCount = codeArr.length;
+				var i:int = _toFetchVideoList.length;
+				while(--i > -1){
+					if(codeArr.indexOf(_toFetchVideoList[i].code) == -1){
+						_toFetchVideoList.splice(i, 1);
+					}
+				}
+				_textArea.appendText("需要获取的车牌号:" + codeArr.join(",") + "\n");
+				loadImgs();
+			}
+			
+			private function loadImgs():void{
+				if(_isWillStop){
+					reset();
+					_textArea.appendText("停止获取\n");
+				} else {
+					_curToFetchVideoData = _toFetchVideoList[_curVideoIndex];
+					_textArea.appendText("======开始获取车牌号:" + _curToFetchVideoData.code + "======\n");
+					// 下载小图片
+					_textArea.appendText("开始下载封面图\n");
+					var loader:Loader = new Loader();
+					loader.contentLoaderInfo.addEventListener(Event.COMPLETE, onLoadImgS);
+					loader.load(new URLRequest(_curToFetchVideoData.imgSUrl));	
+				}
+			}
+			
+			private function onLoadImgS(evt:Event):void{
+				var loaderInfo:LoaderInfo = evt.target as LoaderInfo;
+				loaderInfo.removeEventListener(Event.COMPLETE, onLoadImgS);
+				
+				if(saveImg(loaderInfo.loader, false)){
+					fetchVideoHtml();
+				}
+			}
+			
+			private function fetchVideoHtml():void{
+				_textArea.appendText("开始获取车辆详情\n");
+				var videoLoader:URLLoader = new URLLoader();
+				videoLoader.addEventListener(Event.COMPLETE, onFetchVideoHtml);
+				videoLoader.load(new URLRequest(Config.instance.webURL + "/" + _curToFetchVideoData.code));
+			}
+			
+			private function onFetchVideoHtml(evt:Event):void{
+				var urlLoader:URLLoader = evt.target as URLLoader;
+				urlLoader.removeEventListener(Event.COMPLETE, onFetchVideoHtml);
+				
+				_curToFetchVideoData.html = urlLoader.data.toString(); 
+				_textArea.appendText("开始下载大图\n");
+				var loader:Loader = new Loader();
+				loader.contentLoaderInfo.addEventListener(Event.COMPLETE, onLoadImgB);
+				loader.load(new URLRequest(_curToFetchVideoData.html.match(/<a class="bigImage" href=".*"><img/)[0].toString().replace('<a class="bigImage" href="', '').replace('"><img', '')));
+			}
+			
+			private function onLoadImgB(evt:Event):void{
+				var loaderInfo:LoaderInfo = evt.target as LoaderInfo;
+				loaderInfo.removeEventListener(Event.COMPLETE, onLoadImgB);
+				
+				if(saveImg(loaderInfo.loader, true)){
+					_textArea.appendText("开始提取数据并写入数据库\n");
+					var dataObject:Object = Utils.fetchVideoDataFromHtml(_curToFetchVideoData.html);
+					Net.instance.fetch(API.addVideo(dataObject.code, dataObject.name, dataObject.dateString, dataObject.actress, dataObject.category, dataObject.series), this.onAddedVideo);
+				}
+			}
+			
+			private function onAddedVideo(videoObj:Object):void{
+				_textArea.appendText("写入数据库成功\n");
+				if(++_curVideoIndex < _totalVideoCount){
+					loadImgs();
+				} else {
+					_curPage++;
+					this.fetchPageHtml();
+				}
+			}
+			
+			private function saveImg(loader:Loader, isBig:Boolean = true):Boolean{
+				var bmd:BitmapData = new BitmapData(loader.contentLoaderInfo.width, loader.contentLoaderInfo.height);
+				bmd.draw(loader);
+				
+				var encoder:JPGEncoder = new JPGEncoder(60);
+				try{
+					var fl:File = new File(Config.getVideoPath()[0] + File.separator + _curToFetchVideoData.code + File.separator + _curToFetchVideoData.code + (isBig ? "l.jpg" : "s.jpg"));
+					if(!fl.exists){
+						var fs:FileStream = new FileStream();
+						//open file in write mode
+						fs.open(fl, FileMode.WRITE);
+						//write bytes from the byte array
+						fs.writeBytes(encoder.encode(bmd));
+						//close the file
+						fs.close();						
+					}
+					
+				}catch(e:Error){
+					Alert.show(e.message);
+					return false;
+				}
+				return true;
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	<s:VGroup width="100%" height="100%">
+		<s:HGroup width="100%">
+			<s:Button label="开始获取数据" click="onBeginFetch(event)"/>
+			<s:Button label="停止获取数据" click="onStopFetch(event)"/>
+		</s:HGroup>
+		<s:TextArea id="_textArea" width="100%" height="100%" editable="false"/>
+	</s:VGroup>
+</s:TitleWindow>

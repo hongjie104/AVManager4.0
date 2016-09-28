@@ -32,7 +32,7 @@ package com.avManager.model.data
 		}
 		
 		public function createWithJson(json:Object):void{
-			id = json.id;
+			id = json._id;
 			name = json.name;
 		}
 

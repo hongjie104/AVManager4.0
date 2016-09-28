@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009"
+			   xmlns:s="library://ns.adobe.com/flex/spark"
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   xmlns:detail="com.avManager.view.actress.detail.*"
+			   width="1280" height="800" close="onCloseHandler(event)"
+			   creationComplete="onCreationCompleted(event)">
+	<fx:Script>
+		<![CDATA[
+			import com.avManager.API;
+			import com.avManager.Net;
+			import com.avManager.model.data.Actress;
+			import com.avManager.view.video.container.VideoCell;
+			
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			
+			import org.libra.flex.utils.PopUpUtil;
+			import org.libra.utils.text.StringUtil;
+
+			private static const _COUNT:int = 23;
+			
+			private var _actress:Actress;
+			
+			[Bindable]
+			private var _curPage:int = 1;
+			
+			[Bindable]
+			private var _totalPage:int;
+			
+			private var _totalCount:int;
+			
+			public function get actress():Actress
+			{
+				return _actress;
+			}
+
+			public function set actress(value:Actress):void
+			{
+				_actress = value;
+				renderActressCell();
+			}
+
+			private function onCloseHandler(event:CloseEvent = null):void {
+				PopUpUtil.instance.removePopUp(this, 1);
+			}
+			
+			protected function onCreationCompleted(event:FlexEvent):void
+			{
+				renderActressCell();				
+			}
+			
+			private function renderActressCell():void{
+				if(this.initialized){
+					_actressDetailCell.actress = actress;
+					_nameLabel.text = actress.name;
+					_aliasInput.text = StringUtil.isNullOrEmpty(actress.alias) ? null : actress.alias;
+					
+					fetchActressVideo();
+				}
+			}
+			
+			private function fetchActressVideo():void{
+				Net.instance.fetch(API.getActresVideo(actress.id, _sortTypeComboBox.selectedIndex + 1, (_curPage - 1) * _COUNT, _COUNT), this.onFetchActressVideo);
+			}
+			
+			private function onFetchActressVideo(data:Object):void{
+				_totalCount = data.count;
+				
+				_totalPage = Math.ceil(_totalCount / _COUNT);
+				
+				var l:int = data.video.length;
+				for(var i:int = 0; i < l; i++) {
+					var v:com.avManager.model.data.Video = new com.avManager.model.data.Video();
+					v.createWithJson(data.video[i]);
+					this.renderVideoDetail(v, i);
+				}
+				for(i = l; i < _COUNT; i++){
+					this.renderVideoDetail(null, i);
+				}
+			}
+			
+			private function renderVideoDetail(video:com.avManager.model.data.Video, index:int):void{
+				// 因为第一个是ActressDetailCell，所以这里要加一
+				index = index + 1;
+				var videoCell:VideoCell = null;
+				if(index < _container.numElements){
+					videoCell = _container.getElementAt(index) as VideoCell;	
+				} else {
+					videoCell = new VideoCell();
+					_container.addElement(videoCell);
+				}
+				
+				if(videoCell){
+					videoCell.video = video;
+				}
+			}
+			
+			private function toModifyActress():void{
+				Net.instance.fetch(API.modifyActress(_actress.id, _aliasInput.text, _actress.birthday, _actress.height, _actress.bust, _actress.waist, _actress.hip, _actress.cup, _actress.score), this.onModifyActress);
+			}
+			
+			private function onModifyActress(actressObj:Object):void{
+				_actress.createWithJson(actressObj);
+				actress = _actress;
+			}
+			
+			protected function onPrevPage(event:MouseEvent):void
+			{
+				if(this._curPage > 1){
+					this._curPage--;
+					fetchActressVideo();
+				}
+			}
+			
+			protected function onNextPage(event:MouseEvent):void
+			{
+				if(this._curPage < this._totalPage) {
+					this._curPage++;
+					fetchActressVideo();
+				}
+			}
+			
+			protected function onSortTypeComboBoxChanged(event:Event):void
+			{
+				this._curPage = 1;
+				fetchActressVideo();
+			}
+			
+			protected function onModifyAlias(event:MouseEvent):void
+			{
+				toModifyActress();
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	<s:VGroup width="100%" height="100%" gap="4">
+		<s:HGroup width="100%" height="26" gap="4" paddingLeft="6" paddingRight="6"
+				  verticalAlign="middle">
+			<s:Label id="_nameLabel" width="120" fontWeight="bold" verticalAlign="middle"/>
+			<s:TextInput id="_aliasInput" width="300" prompt="女司机别名" toolTip="女司机别名，用|分隔"/>
+			<s:Button label="修改别名" click="onModifyAlias(event)"/>
+			<s:HGroup width="100%" height="100%" horizontalAlign="right" verticalAlign="middle">
+				<s:ComboBox id="_sortTypeComboBox" width="86"
+							change="onSortTypeComboBoxChanged(event)"
+							initialize="_sortTypeComboBox.textInput.editable=false"
+							selectedIndex="0">
+					<s:ArrayCollection>
+						<fx:String>按评分降序</fx:String>
+						<fx:String>按评分升序</fx:String>
+						<fx:String>按日期降序</fx:String>
+						<fx:String>按日期升序</fx:String>
+						<fx:String>按番号降序</fx:String>
+						<fx:String>按番号升序</fx:String>
+					</s:ArrayCollection>
+				</s:ComboBox>
+				<s:Button label="前一页" click="onPrevPage(event)"/>
+				<s:Button label="后一页" click="onNextPage(event)"/>
+				<s:Label height="100%" text="{this._curPage}/{this._totalPage}"
+						 verticalAlign="middle"/>
+			</s:HGroup>
+		</s:HGroup>
+		<s:Scroller width="100%" height="100%">
+			<s:TileGroup id="_container" orientation="rows">
+				<detail:ActressDetailCell id="_actressDetailCell"/>
+			</s:TileGroup>
+		</s:Scroller>
+	</s:VGroup>
+</s:TitleWindow>

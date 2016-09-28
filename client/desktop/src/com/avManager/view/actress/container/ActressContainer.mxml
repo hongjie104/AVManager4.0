@@ -10,9 +10,11 @@
 			import com.avManager.API;
 			import com.avManager.Net;
 			import com.avManager.model.data.Actress;
+			import com.avManager.view.actress.detail.ActressDetail;
 			
 			import mx.events.FlexEvent;
 			
+			import org.libra.flex.utils.PopUpUtil;
 			import org.libra.utils.text.StringUtil;
 			
 			// 一页的数量
@@ -84,7 +86,15 @@
 				for(var i:int = 0; i < _COUNT; i++){
 					actressCell = new ActressCell();
 					_container.addElement(actressCell);
+					actressCell.addEventListener(MouseEvent.CLICK, onActressCellClicked);
 				}
+			}
+			
+			private function onActressCellClicked(evt:MouseEvent):void{
+				var actressCell:ActressCell = evt.currentTarget as ActressCell;
+				var detail:ActressDetail = new ActressDetail();
+				detail.actress = actressCell.actress;
+				PopUpUtil.instance.addPopUp(detail, this, true, 1);
 			}
 			
 			private function onSortTypeComboBoxChanged(evt:Event):void{

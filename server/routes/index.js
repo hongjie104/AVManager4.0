@@ -20,11 +20,20 @@ router.get('getActressedByID/:id', actressController.getActressedByID);
 
 router.get('getActressedByName/:name/:startIndex/:count', actressController.getActressedByName);
 
+router.get('getActresVideo/:actressID/:sortType/:startIndex/:count', actressController.getActresVideo);
+
+router.get('modifyActress/:id/:alias/:birthday/:height/:bust/:waist/:hip/:cup/:score', actressController.modifyActress);
+
 router.get('getVideo/:startIndex/:count/:sortType/:keyWord', videoController.getVideo);
 
 router.get('addVideo/:code/:name/:date/:actress/:series/:category', videoController.addVideo)
 
 router.get('addActressToVideo/:id/:actress', videoController.addActressToVideo);
+
+/**
+ * 过滤番号，将已有的番号过滤掉
+ */
+router.get('filterVideoCode/:codeList', videoController.filterVideoCode);
 
 router.get('getCategoryByID/:id', categoryController.getCategoryByID);
 

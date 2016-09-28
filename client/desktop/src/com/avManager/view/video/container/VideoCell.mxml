@@ -50,7 +50,7 @@
 			
 			protected function onClicked(event:MouseEvent):void
 			{
-				this.dispatchEvent(new com.avManager.events.VideoEvent(com.avManager.events.VideoEvent.SHOW_DETAIL, this.video));	
+				this.dispatchEvent(new com.avManager.events.VideoEvent(com.avManager.events.VideoEvent.VIDEO_CLICKED, this.video));	
 			}
 			
 			protected function onCreationCompleted(event:FlexEvent):void

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
 		 xmlns:s="library://ns.adobe.com/flex/spark" 
-		 xmlns:mx="library://ns.adobe.com/flex/mx" width="125" height="145" xmlns:actress="com.avManager.view.actress.*">
+		 xmlns:mx="library://ns.adobe.com/flex/mx" width="125" height="145" xmlns:actress="com.avManager.view.actress.*" xmlns:container="com.avManager.view.actress.container.*">
 	<fx:Script>
 		<![CDATA[
 			import com.avManager.model.data.Actress;
@@ -17,6 +17,7 @@
 			public function set isSelected(value:Boolean):void
 			{
 				_isSelected = value;
+				_selectedImg.visible = value;
 			}
 
 			public function get actress():Actress
@@ -29,11 +30,16 @@
 				_actress = value;
 				_cell.actress = value;
 			}
+			
+			public function get isVisible():Boolean{
+				return _cell.visible;
+			}
+			
 		]]>
 	</fx:Script>
 	<fx:Declarations>
 		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
 	</fx:Declarations>
-	<actress:ActressCell id="_cell"/>
-	<s:Image source="@Embed('assets/selected.png')"/>
+	<container:ActressCell id="_cell"/>
+	<s:Image id="_selectedImg" visible="false" width="32" height="32" x="{this.width - 32}" y="{this.height - 32 - 20}" source="@Embed('assets/selected.png')"/>
 </s:Group>

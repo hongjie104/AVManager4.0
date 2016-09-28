@@ -6,6 +6,7 @@ let CategoryModel = require("../models/categoryModel");
 let SeriesModel   = require("../models/seriesModel");
 let numberUtil    = require('../utils/numberUtil');
 let jsonUtil      = require('../utils/jsonUtil');
+let dateUtil      = require('../utils/dateUtil');
 let mongoose      = require('mongoose');
 
 exports.getVideo = function *() {
@@ -51,9 +52,9 @@ exports.addVideo = function *() {
 		const name = this.params.name;
 
 		let arr = this.params.date.split('-');
-		const date = new Date(arr[0], arr[1], arr[2]);
+		const date = dateUtil.toMongoDate(new Date(arr[0], arr[1], arr[2]));
 
-		arr = this.params.actress.split('&');
+		arr = this.params.actress === "!" ? [] : this.params.actress.split('&');
 		const actress = [];
 		let a = null;
 		for (let i = 0; i < arr.length; i++) {
@@ -105,11 +106,20 @@ exports.addActressToVideo = function *() {
 		let actress = yield ActressModel.findOne({name: this.params.actress});
 		if (actress) {
 			yield VideoModel.update({_id: id}, {$addToSet: {actress: actress._id}});
-			this.body = jsonUtil.createAPI(1);
+			this.body = jsonUtil.createAPI(1, jsonUtil.actress2Json(actress));
 		} else {
 			this.body = jsonUtil.createAPI(-2, `没有找到演员:${this.params.actress}`);
 		}
 	} else {
 		this.body = jsonUtil.createAPI(-1, `没有找到影片:${id}`);
 	}
+};
+
+exports.filterVideoCode = function *() {
+	const codeArr = this.params.codeList.split('&');
+	let videoes = yield VideoModel.find({code: {$in: [codeArr]}}, {code: 1});
+	for (let i = 0; i < videoes.length; i++) {
+		codeArr.splice(codeArr.indexOf(videoes[i].code), 1);
+	}
+	this.body = jsonUtil.createAPI(1, codeArr);
 };

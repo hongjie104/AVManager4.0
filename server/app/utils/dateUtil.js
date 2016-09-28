@@ -11,6 +11,10 @@ exports.now = function () {
 	return moment(new Date()).add(8, 'hours');
 };
 
+exports.toMongoDate = function (date) {
+	return moment(date).add(8, 'hours');
+};
+
 exports.defaultDay = function () {
 	return new Date(2000, 0, 1);
 };

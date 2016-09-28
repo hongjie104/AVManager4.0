@@ -8,6 +8,7 @@
 			import com.avManager.model.Config;
 			
 			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
 			
 			import org.libra.utils.MathUtil;
 			
@@ -72,7 +73,7 @@
 						});
 					}
 				} else {
-					
+					Alert.show("暫時沒有磁力連結,請等待網友分享!", "what a pity!");					
 				}
 			}
 			
