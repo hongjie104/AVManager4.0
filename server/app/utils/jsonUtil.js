@@ -56,7 +56,8 @@ function _video2Json(video) {
 		category: video.category,
 		series: video.series,
 		actress: video.actress,
-		score: video.score
+		score: video.score,
+		isDesired: video.isDesired ? 1 : 0
 	};
 }
 

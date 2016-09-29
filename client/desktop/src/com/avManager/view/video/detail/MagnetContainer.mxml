@@ -5,12 +5,10 @@
 		  width="400" height="100">
 	<fx:Script>
 		<![CDATA[
-			import com.avManager.model.Config;
+			import com.avManager.Utils;
 			
 			import mx.collections.ArrayCollection;
 			import mx.controls.Alert;
-			
-			import org.libra.utils.MathUtil;
 			
 			[Bindable]
 			private var _data:ArrayCollection = new ArrayCollection();
@@ -26,54 +24,17 @@
 			protected function onFetch(event:MouseEvent):void
 			{
 				if(_videoCode){
-					var loader:URLLoader = new URLLoader();
-					loader.addEventListener(Event.COMPLETE, onLoadHtml);
-					loader.load(new URLRequest(Config.instance.webURL + "/" + _videoCode));
+					Utils.fetchMagnet(_videoCode, onFetched, this);
 				}
 			}
 			
-			private function onLoadHtml(evt:Event):void{
-				var gid:String = "";
-				var uc:String = "";
-				var img:String = "";
-				
-				var loader:URLLoader = evt.target as URLLoader;
-				loader.removeEventListener(Event.COMPLETE, onLoadHtml);
-				
-				var result:Array = (/var gid = \d+/).exec(loader.data);
-				if(result && result.length > 0) {
-					gid = result[0].toString().replace("var gid = ", "");
-					result = (/var uc = \d+/).exec(loader.data);
-					if(result && result.length > 0) {
-						uc = result[0].toString().replace("var uc = ", "");
-						result = (/var img = '.*'/).exec(loader.data);
-						if(result && result.length > 0) {
-							img = result[0].toString().replace("var img = '", "").replace("'", "");
-							
-							loader.addEventListener(Event.COMPLETE, onLoadMagnet);
-							// "https://www.javbus5.com/ajax/uncledatoolsbyajax.php?gid=32451078852&lang=zh&img=https://pics.javbus.info/cover/5p4b_b.jpg&uc=0&floor=359"
-							loader.load(new URLRequest(Config.instance.webURL + "/ajax/uncledatoolsbyajax.php?gid=" + gid + "&lang=zh&img=" + img + "&uc=" + uc + "&floor=" + Math.floor(MathUtil.random(100, 999))));
-						}
-					}
-				}
-			}
-			
-			private function onLoadMagnet(evt:Event):void{
-				var loader:URLLoader = evt.target as URLLoader;
-				loader.removeEventListener(Event.COMPLETE, onLoadMagnet);
-				
-				if(loader.data.indexOf("暫時沒有磁力連結") == -1){
-					var arr:Array = loader.data.match(/<a style="color:#333" rel="nofollow".*>\r*\n*.*<\/a>/g);
-					for(var i:int = 0; i < arr.length; i += 3) {
-						_data.addItem({
-							"name":arr[i].toString().replace(/<a.*">/, "").replace(/\r*\n*\s*\t*/g, "").replace("</a>", ""),
-							"size":arr[i + 1].toString().replace(/<a.*">/, "").replace(/\r*\n*\s*\t*/g, "").replace("</a>", ""),
-							"date":arr[i + 2].toString().replace(/<a.*">/, "").replace(/\r*\n*\s*\t*/g, "").replace("</a>", ""),
-							"url":arr[i].toString().match(/href=".*"/)[0].toString().replace("href=\"", "").replace("\"", "")
-						});
-					}
+			private function onFetched(magnetList:Array):void{
+				if(magnetList.length > 0) {
+					for each(var magnetObj:Object in magnetList){
+						_data.addItem(magnetObj);
+					}	
 				} else {
-					Alert.show("暫時沒有磁力連結,請等待網友分享!", "what a pity!");					
+					Alert.show("暫時沒有磁力連結,請等待網友分享!", "what a pity!");
 				}
 			}
 			

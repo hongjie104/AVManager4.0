@@ -3,8 +3,9 @@
 			   xmlns:s="library://ns.adobe.com/flex/spark"
 			   xmlns:mx="library://ns.adobe.com/flex/mx"
 			   xmlns:video="com.avManager.view.video.*"
+			   xmlns:detail="com.avManager.view.video.detail.*"
 			   width="1200" height="618" close="onCloseHandler(event)"
-			   creationComplete="onCreationCompleted(event)" xmlns:detail="com.avManager.view.video.detail.*">
+			   creationComplete="onCreationCompleted(event)" title="车辆详情">
 	<fx:Script>
 		<![CDATA[
 			import com.avManager.API;
@@ -15,6 +16,7 @@
 			import com.avManager.view.actress.container.ActressCell;
 			import com.avManager.view.actress.selector.ActressSelector;
 			
+			import mx.controls.Alert;
 			import mx.events.CloseEvent;
 			import mx.events.FlexEvent;
 			
@@ -52,10 +54,17 @@
 					_codeLabel.text = _video.code;
 					_dateLabel.text = DateUtil.toString(_video.date);
 					_scoreSlider.value = _video.score;
+					_scoreLabel.text = _video.score.toString();
 					_magnetContainer.videoCode = _video.code;
 					
+					if(_video.isDesired){
+						_isDesiredImg.source = 'assets/desired.png';
+					} else {
+						_isDesiredImg.source = 'assets/unDesired.png';
+					}
+					
 					var f:File;
-					var imgName:String = "\\" + _video.code + "\\" + _video.code + "l.jpg";
+					var imgName:String = File.separator + _video.code + File.separator + _video.code + "l.jpg";
 					var pathArr:Array = Config.getVideoPath();
 					for each(var p:String in pathArr) {
 						f = new File(p + imgName);
@@ -103,7 +112,7 @@
 				var pathArr:Array = Config.getVideoPath();
 				var f:File;
 				for each(var p:String in pathArr) {
-					f = new File(p + "\\" + video.code);
+					f = new File(p + File.separator + video.code);
 					if(f.exists && f.isDirectory) {
 						NativeProcessUtil.runCMD("start", f.nativePath, "/max");		
 						break;
@@ -118,7 +127,7 @@
 				var exists:Boolean = false;
 				for each(var p:String in pathArr) {
 					for each(var format:String in formatArr){
-						f = new File(p + "\\" + video.code + "\\" + video.code + "." + format);
+						f = new File(p + File.separator + video.code + File.separator + video.code + "." + format);
 						if(f.exists) {
 							f.openWithDefaultApplication();
 							exists = true;
@@ -128,6 +137,9 @@
 					if(exists){
 						break;
 					}
+				}
+				if(!exists){
+					Alert.show("没有找到车辆");
 				}
 			}
 			
@@ -152,6 +164,32 @@
 				video.actress.push(actress.id);
 			}
 			
+			protected function onScoreSliderChangeEnded(event:FlexEvent):void
+			{
+				var score:int = _scoreSlider.value;
+				_scoreLabel.text = score.toString();
+				Net.instance.fetch(API.modifyVideoScore(_video.id, score), this.onModifyVideoScore);
+			}
+			
+			private function onModifyVideoScore(data:Object):void{
+				// do nothing
+			}
+			
+			protected function onDesiredImgClicked(event:MouseEvent):void
+			{
+				Net.instance.fetch(API.modifyVideoIsDesired(video.id, !video.isDesired), this.onModifyDesired);
+			}
+			
+			private function onModifyDesired(data:Object):void{
+				video.isDesired = !video.isDesired;
+				video = video;
+				if(video.isDesired){
+					Alert.show("已将该车辆添加到愿望清单中");
+				} else {
+					Alert.show("已将该车辆从愿望清单中移除");
+				}
+			}
+			
 		]]>
 	</fx:Script>
 	<fx:Declarations>
@@ -159,7 +197,11 @@
 	</fx:Declarations>
 	<s:HGroup width="100%" height="100%">
 		<s:VGroup width="800" height="100%">
-			<s:Label id="_titleLabel" width="100%" height="36"/>
+			<s:HGroup width="100%" height="36" verticalAlign="middle">
+				<s:Label id="_titleLabel" width="100%" height="100%"/>
+				<s:Image id="_isDesiredImg" width="32" height="32" click="onDesiredImgClicked(event)"
+						 source="@Embed('assets/unDesired.png')"/>
+			</s:HGroup>
 			<s:Image id="_img" width="800" height="537"
 					 source="@Embed('assets/defaultVideoCover.jpg')"/>
 		</s:VGroup>
@@ -183,8 +225,9 @@
 			<s:HGroup width="100%" height="18" paddingRight="6" textAlign="center"
 					  verticalAlign="middle">
 				<s:Label width="70" fontWeight="bold" text="评分:" textAlign="left"/>
-				<s:HSlider id="_scoreSlider" width="100%" maximum="100"/>
-				<s:Label id="_scoreLabel" width="20" text="36"/>
+				<s:HSlider id="_scoreSlider" width="100%" changeEnd="onScoreSliderChangeEnded(event)"
+						   maximum="100"/>
+				<s:Label id="_scoreLabel" width="22" text="300"/>
 			</s:HGroup>
 			<s:VGroup width="100%">
 				<s:HGroup width="100%" verticalAlign="middle">

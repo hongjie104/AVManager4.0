@@ -11,7 +11,6 @@
 			import com.avManager.model.data.Actress;
 			
 			import mx.collections.ArrayCollection;
-			import mx.events.CalendarLayoutChangeEvent;
 			
 			[Bindable]
 			private var _cpuData:ArrayCollection = new ArrayCollection(["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]);
@@ -27,7 +26,7 @@
 			{
 				_actress = value;
 				if(value){
-					var f:File = new File(Config.instance.actressPath + "/" + value.javBusCode + "/" + value.javBusCode + ".jpg");
+					var f:File = new File(Config.instance.actressPath + File.separator + value.javBusCode + File.separator + value.javBusCode + ".jpg");
 					if(f.exists) {
 						_img.source = f.nativePath;
 					} else {
@@ -104,24 +103,29 @@
 					  yearNavigationEnabled="true"/>
 	</s:HGroup>
 	<s:HGroup width="100%" gap="2" paddingLeft="0" paddingRight="0" verticalAlign="middle">
-		<s:NumericStepper id="_heightStepper" width="50%" maximum="300" minimum="0" stepSize="1"
-						  valueFormatFunction="formatHeightValue" valueParseFunction="parseValue" change="toModifyActress(event)"/>
-		<s:NumericStepper id="_scoreStepper" width="50%" maximum="100" minimum="0" stepSize="1"
-						  valueFormatFunction="formatScoreValue" valueParseFunction="parseValue" change="toModifyActress(event)"/>
+		<s:NumericStepper id="_heightStepper" width="50%" change="toModifyActress(event)"
+						  maximum="300" minimum="0" stepSize="1"
+						  valueFormatFunction="formatHeightValue" valueParseFunction="parseValue"/>
+		<s:NumericStepper id="_scoreStepper" width="50%" change="toModifyActress(event)"
+						  maximum="100" minimum="0" stepSize="1"
+						  valueFormatFunction="formatScoreValue" valueParseFunction="parseValue"/>
 	</s:HGroup>
 	<s:HGroup width="100%" gap="2" paddingLeft="0" paddingRight="0" verticalAlign="middle">
-		<s:NumericStepper id="_bustStepper" width="50%" maximum="200" minimum="0" stepSize="1"
-						  valueFormatFunction="formatBustValue" valueParseFunction="parseValue" change="toModifyActress(event)"/>
+		<s:NumericStepper id="_bustStepper" width="50%" change="toModifyActress(event)" maximum="200"
+						  minimum="0" stepSize="1" valueFormatFunction="formatBustValue"
+						  valueParseFunction="parseValue"/>
 		<s:HGroup width="50%" gap="2" verticalAlign="middle">
 			<s:Label text="罩杯:"/>
-			<s:ComboBox id="_cupComboBox" width="40" dataProvider="{_cpuData}"
-						initialize="_cupComboBox.textInput.editable=false" change="toModifyActress(event)"/>
+			<s:ComboBox id="_cupComboBox" width="40" change="toModifyActress(event)"
+						dataProvider="{_cpuData}" initialize="_cupComboBox.textInput.editable=false"/>
 		</s:HGroup>
 	</s:HGroup>
 	<s:HGroup width="100%" gap="2" paddingLeft="0" paddingRight="0" verticalAlign="middle">
-		<s:NumericStepper id="_waistStepper" width="50%" maximum="200" minimum="0" stepSize="1"
-						  valueFormatFunction="formatWaistValue" valueParseFunction="parseValue" change="toModifyActress(event)"/>
-		<s:NumericStepper id="_hipStepper" width="50%" maximum="200" minimum="0" stepSize="1"
-						  valueFormatFunction="formatHipValue" valueParseFunction="parseValue" change="toModifyActress(event)"/>
+		<s:NumericStepper id="_waistStepper" width="50%" change="toModifyActress(event)"
+						  maximum="200" minimum="0" stepSize="1"
+						  valueFormatFunction="formatWaistValue" valueParseFunction="parseValue"/>
+		<s:NumericStepper id="_hipStepper" width="50%" change="toModifyActress(event)" maximum="200"
+						  minimum="0" stepSize="1" valueFormatFunction="formatHipValue"
+						  valueParseFunction="parseValue"/>
 	</s:HGroup>
 </s:VGroup>

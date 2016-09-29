@@ -3,7 +3,7 @@
 			   xmlns:s="library://ns.adobe.com/flex/spark"
 			   xmlns:mx="library://ns.adobe.com/flex/mx"
 			   width="1053" height="618" close="onCloseHandler(event)"
-			   creationComplete="onCreationCompleted(event)">
+			   creationComplete="onCreationCompleted(event)" title="挑选女司机">
 	<fx:Script>
 		<![CDATA[
 			import com.avManager.API;

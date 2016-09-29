@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009"
+			   xmlns:s="library://ns.adobe.com/flex/spark"
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   width="800" height="600" close="onCloseHandler(event)" title="抓取最新女司机信息" creationComplete="onCreationCompleted(event)">
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.images.JPGEncoder;
+			import com.avManager.API;
+			import com.avManager.Net;
+			import com.avManager.model.Config;
+			
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			
+			import org.libra.flex.utils.PopUpUtil;
+			
+			private var _lastestNum:int = 0;
+			
+			private var _curNum:int;
+			
+			private var _loader:URLLoader = new URLLoader();
+			
+			private var _toFetchActress:ToFetchActressData;
+			
+			private var _checkCount:int = 0;
+			
+			private function onCloseHandler(event:CloseEvent = null):void {
+				_loader.removeEventListener(Event.COMPLETE, onFetchActressHtml);
+				_loader.removeEventListener(IOErrorEvent.IO_ERROR, onIOError);
+				PopUpUtil.instance.removePopUp(this, 1);
+			}
+			
+			protected function onCreationCompleted(event:FlexEvent):void
+			{
+				_loader.addEventListener(Event.COMPLETE, onFetchActressHtml);
+				_loader.addEventListener(IOErrorEvent.IO_ERROR, onIOError);
+				_toFetchActress = new ToFetchActressData();
+			}
+			
+			private function onFetchLastestJavBusNum(num:int):void{
+				_lastestNum = num;
+				_curNum = _lastestNum + 1;
+				fetchActressHtml();
+			}
+			
+			protected function onStartFetch(event:MouseEvent):void
+			{
+				_checkCount = 0;
+				Net.instance.fetch(API.getLastestActressJavBusNum(), onFetchLastestJavBusNum);
+			}
+			
+			private function fetchActressHtml():void{
+				_toFetchActress.reset();
+				var code:String = _curNum.toString(36);
+				_toFetchActress.javBusCode = code;
+				_textArea.appendText("======开始获取编码为" + code + "的数据======\n");
+				var r:URLRequest = new URLRequest(Config.instance.webURL + "/star/" + code);
+				_loader.load(r);
+			}
+			
+			private function onFetchActressHtml(evt:Event):void{
+				var html:String = _loader.data.toString();
+				/*
+				<div class="avatar-box">
+				<div class="photo-frame">
+				<img src="https://pics.javbus.info/actress/2jv_a.jpg" title="波多野結衣">
+				</div>
+				<div class="photo-info">
+				<span class="pb10">波多野結衣</span>                        <p>生日: 1988-05-24</p>                        <p>年齡: 26</p>                         <p>身高: 163cm</p>  
+				<p>罩杯: D</p>  
+				<p>胸圍: 88cm</p>  
+				<p>腰圍: 59cm</p>  
+				<p>臀圍: 85cm</p>  
+				<p>出生地: 京都府</p>  
+				<p>愛好: ゲーム</p>                     </div>
+				</div>
+				</div>        
+				
+				*/
+				
+				var arr:Array = html.match(/<div class="avatar-box">\s*<div class="photo-frame">\s*<img src.*\s*<\/div>\s*<div class="photo-info">\s*<span clas.*\s*(<p>.*\s*)*<\/div/);
+				if(arr){
+					var avatarHtml:String = arr[0];
+					var s:String = avatarHtml.replace(/                        /g, "\n");
+					arr = s.match(/<p>.*<\/p>/g);
+					var arr1:Array;
+					for each(s in arr){
+						s = s.replace(/<\/?p>/g, "");
+						/*
+						生日: 1978-08-31
+						年齡: 36
+						身高: 160cm
+						罩杯: F
+						胸圍: 86cm
+						腰圍: 60cm
+						臀圍: 88cm
+						愛好: スポーツ全般
+						*/
+						arr1 = s.split(": ");
+						if(arr1[0] == "生日"){
+							var arr2:Array = arr1[1].split("-");
+							_toFetchActress.birthday = new Date(arr2[0], int(arr2[1]) - 1, arr2[2]);
+						} else if(arr1[0] == "身高"){
+							_toFetchActress.height = int(arr1[1].replace("cm", ""));
+						} else if(arr1[0] == "罩杯"){
+							_toFetchActress.cup = arr1[1];
+						} else if(arr1[0] == "胸圍"){
+							_toFetchActress.bust = int(arr1[1].replace("cm", ""));
+						} else if(arr1[0] == "腰圍"){
+							_toFetchActress.waist = int(arr1[1].replace("cm", ""));
+						} else if(arr1[0] == "臀圍"){
+							_toFetchActress.hip = int(arr1[1].replace("cm", ""));
+						}
+					}
+					
+					// 取出名字和别名
+					arr = avatarHtml.match(/<img src.*">/)[0].split(' ');
+					// <img,src="https://pics.javbus.info/actress/1_a.jpg",title="坂上友香">
+					s = arr[2].toString().replace("title=\"", "").replace("\">", "");
+					if(s.indexOf("（") != -1){
+						_toFetchActress.name = arr1[0];
+						arr1 = s.replace("）", "").split("（");
+						_toFetchActress.alias = arr1[1].toString().replace("、", "|").replace("，", "|");
+					} else {
+						_toFetchActress.name = s;
+					}
+					
+					_textArea.appendText("开始获取头像\n");
+					// 保存头像
+					var loader:Loader = new Loader();
+					loader.contentLoaderInfo.addEventListener(Event.COMPLETE, onLoadImg);
+					loader.load(new URLRequest(arr[1].toString().replace("src=\"", "").replace("\"", "")));					
+				} else {
+					_textArea.appendText(_toFetchActress.javBusCode + "页面有问题，继续抓取下一个\n");
+					_curNum++;
+					fetchActressHtml();
+				}
+			}
+			
+			private function onIOError(evt:IOErrorEvent):void{
+				// 这个编号是空的，可能是因为没了，也可能是因为javbus网站数据库的问题，所以再试一下下一个编号，如果下一个编号还是没有，那么认为的确是没了
+				if(_checkCount++ < 100){
+					_textArea.appendText("编号" + _curNum.toString(36) + "为空页面，试一下下一个编码\n");
+					_curNum++;
+					fetchActressHtml();
+				} else {
+					_textArea.appendText("搞定了");
+				}
+			}
+			
+			private function onLoadImg(evt:Event):void{
+				var loaderInfo:LoaderInfo = evt.target as LoaderInfo;
+				loaderInfo.removeEventListener(Event.COMPLETE, onLoadImg);
+				
+				var bmd:BitmapData = new BitmapData(loaderInfo.width, loaderInfo.height);
+				bmd.draw(loaderInfo.loader);
+				
+				var encoder:JPGEncoder = new JPGEncoder(60);
+				try{
+					var fl:File = new File(Config.instance.actressPath + File.separator + _toFetchActress.javBusCode + File.separator + _toFetchActress.javBusCode + ".jpg");
+					if(!fl.exists){
+						var fs:FileStream = new FileStream();
+						//open file in write mode
+						fs.open(fl, FileMode.WRITE);
+						//write bytes from the byte array
+						fs.writeBytes(encoder.encode(bmd));
+						//close the file
+						fs.close();						
+					}
+				}catch(e:Error){
+					Alert.show(e.message);
+					return;
+				}
+				_textArea.appendText("开始保存数据库\n");
+				Net.instance.fetch(API.addActress(_toFetchActress.name, _toFetchActress.alias, _toFetchActress.birthday, _toFetchActress.height, _toFetchActress.bust, _toFetchActress.waist, _toFetchActress.hip, _toFetchActress.cup, _toFetchActress.javBusCode), onSaveActress);
+			}
+			
+			private function onSaveActress(actressObj:Object):void{
+				_curNum++;
+				fetchActressHtml();
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	<s:VGroup width="100%" height="100%">
+		<s:HGroup width="100%" height="26">
+			<s:Button label="开始抓取" click="onStartFetch(event)"/>
+		</s:HGroup>
+		<s:TextArea id="_textArea" editable="false" width="100%" height="100%"/>
+	</s:VGroup>
+</s:TitleWindow>

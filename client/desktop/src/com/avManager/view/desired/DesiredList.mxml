@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009"
+			   xmlns:s="library://ns.adobe.com/flex/spark"
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   width="600" height="800" close="onCloseHandler(event)"
+			   creationComplete="onCreationCompleted(event)" title="愿望清单">
+	<fx:Script>
+		<![CDATA[
+			import com.avManager.API;
+			import com.avManager.Net;
+			import com.avManager.Utils;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			
+			import org.libra.flex.utils.PopUpUtil;
+			
+			private var _totalCount:int = 0;
+			
+			private var _curIndex:int = 0;
+			
+			[Bindable]
+			private var _listData:ArrayCollection = new ArrayCollection();
+			
+			protected function onCreationCompleted(event:FlexEvent):void
+			{
+				Net.instance.fetch(API.getVideo(-1, -1, 1, true), onFetchVideo);				
+			}
+			
+			private function onFetchVideo(data:Object):void{
+				_totalCount = data.count;
+				
+				var dataArr:Array = [];
+				var l:int = data.video.length;
+				for(var i:int = 0; i < l; i++) {
+					dataArr[i] = {name: data.video[i].name, code: data.video[i].code};
+				}
+				_listData.source = dataArr;
+			}
+			
+			protected function onStartCheck(event:MouseEvent):void
+			{
+				_textArea.text = "";
+				fetchMagnet();
+			}
+			
+			private function fetchMagnet():void{
+				var code:String = _listData.getItemAt(_curIndex).code;
+				_textArea.appendText("======开始获取 " + code + " 的磁链接======\n")
+				Utils.fetchMagnet(code, onFetchMagnet, this);
+			}
+				
+			
+			private function onFetchMagnet(magnetList:Array):void{
+				if(magnetList.length == 0) {
+					_textArea.appendText("暫時沒有磁力連結,請等待網友分享!\n");
+				} else {
+					for each(var magnet:Object in magnetList){
+						_textArea.appendText("[" + magnet.url + "] [" + magnet.size + "] [" + magnet.date + "]\n");
+					}
+				}
+				
+				if(++_curIndex < _totalCount) {
+					fetchMagnet();
+				} else {
+					_textArea.appendText("愿望清单检查完毕");
+				}
+			}
+			
+			private function onCloseHandler(event:CloseEvent = null):void {
+				PopUpUtil.instance.removePopUp(this, 1);
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	<s:VGroup width="100%" height="100%" gap="4">
+		<s:HGroup width="100%" height="26">
+			<s:Button label="开始检查" click="onStartCheck(event)"/>
+		</s:HGroup>
+		<s:List width="100%" height="400" dataProvider="{_listData}" labelField="name"/>
+		<s:TextArea id="_textArea" width="100%" height="100%" editable="false"/>
+	</s:VGroup>
+</s:TitleWindow>

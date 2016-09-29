@@ -1,7 +1,22 @@
 package com.avManager
 {
+	import com.avManager.model.Config;
+	
+	import flash.events.Event;
+	import flash.net.URLLoader;
+	import flash.net.URLRequest;
+	
+	import org.libra.utils.MathUtil;
+
 	public final class Utils
 	{
+		
+		private static var loader:URLLoader = new URLLoader();
+		
+		private static var fetchMagnetCallBack:Function = null;
+		
+		private static var thisArg:Object = null;
+		
 		public function Utils()
 		{
 		}
@@ -45,6 +60,56 @@ package com.avManager
 				category: category,
 				series: series
 			};
+		}
+		
+		public static function fetchMagnet(videoCode:String, cb:Function, thisArg:Object):void{
+			fetchMagnetCallBack = cb;
+			Utils.thisArg = thisArg;
+			loader.addEventListener(Event.COMPLETE, onLoadVideoHtml);
+			loader.load(new URLRequest(Config.instance.webURL + "/" + videoCode));
+		}
+		
+		private static function onLoadVideoHtml(evt:Event):void{
+			var gid:String = "";
+			var uc:String = "";
+			var img:String = "";
+			
+			loader.removeEventListener(Event.COMPLETE, onLoadVideoHtml);
+			
+			var result:Array = (/var gid = \d+/).exec(loader.data);
+			if(result && result.length > 0) {
+				gid = result[0].toString().replace("var gid = ", "");
+				result = (/var uc = \d+/).exec(loader.data);
+				if(result && result.length > 0) {
+					uc = result[0].toString().replace("var uc = ", "");
+					result = (/var img = '.*'/).exec(loader.data);
+					if(result && result.length > 0) {
+						img = result[0].toString().replace("var img = '", "").replace("'", "");
+						
+						loader.addEventListener(Event.COMPLETE, onLoadMagnet);
+						// "https://www.javbus5.com/ajax/uncledatoolsbyajax.php?gid=32451078852&lang=zh&img=https://pics.javbus.info/cover/5p4b_b.jpg&uc=0&floor=359"
+						loader.load(new URLRequest(Config.instance.webURL + "/ajax/uncledatoolsbyajax.php?gid=" + gid + "&lang=zh&img=" + img + "&uc=" + uc + "&floor=" + Math.floor(MathUtil.random(100, 999))));
+					}
+				}
+			}
+		}
+		
+		private static function onLoadMagnet(evt:Event):void{
+			loader.removeEventListener(Event.COMPLETE, onLoadMagnet);
+			
+			var magnetList:Array = [];
+			if(loader.data.indexOf("暫時沒有磁力連結") == -1){
+				var arr:Array = loader.data.match(/<a style="color:#333" rel="nofollow".*>\r*\n*.*<\/a>/g);
+				for(var i:int = 0; i < arr.length; i += 3) {
+					magnetList.push({
+						"name":arr[i].toString().replace(/<a.*">/, "").replace(/\r*\n*\s*\t*/g, "").replace("</a>", ""),
+						"size":arr[i + 1].toString().replace(/<a.*">/, "").replace(/\r*\n*\s*\t*/g, "").replace("</a>", ""),
+						"date":arr[i + 2].toString().replace(/<a.*">/, "").replace(/\r*\n*\s*\t*/g, "").replace("</a>", ""),
+						"url":arr[i].toString().match(/href=".*"/)[0].toString().replace("href=\"", "").replace("\"", "")
+					});
+				}
+			}
+			fetchMagnetCallBack.call(thisArg, magnetList);
 		}
 	}
 }

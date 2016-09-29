@@ -13,11 +13,15 @@ exports.getVideo = function *() {
 	const startIndex = numberUtil.toInt(this.params.startIndex);
 	const count = numberUtil.toInt(this.params.count);
 	const sortType = numberUtil.toInt(this.params.sortType);
+	const desired = numberUtil.toInt(this.params.desired) === 1;
 	const keyWord = jsonUtil.myDecodeURIComponent(this.params.keyWord);
 
 	let condition = {};
 	if (keyWord !== "!") {
 		condition.code = {$regex: keyWord.toUpperCase()};
+	}
+	if (desired) {
+		condition.isDesired = true;
 	}
 	let sortCondition = {};
 	if (sortType === 1) {
@@ -40,7 +44,7 @@ exports.getVideo = function *() {
 		sortCondition.code = 1;
 	}
 
-	let videoes = yield VideoModel.find(condition).sort(sortCondition).limit(count).skip(startIndex);
+	let videoes = count < 1 ? yield VideoModel.find(condition).sort(sortCondition).skip(startIndex < 0 ? 0 : startIndex) : yield VideoModel.find(condition).sort(sortCondition).limit(count).skip(startIndex < 0 ? 0 : startIndex);
 	const totalCount = yield VideoModel.count(condition);
 	this.body = jsonUtil.createAPI(1, {video: jsonUtil.videoes2Json(videoes), count: totalCount});
 };
@@ -122,4 +126,20 @@ exports.filterVideoCode = function *() {
 		codeArr.splice(codeArr.indexOf(videoes[i].code), 1);
 	}
 	this.body = jsonUtil.createAPI(1, codeArr);
+};
+
+exports.modifyVideoScore = function *() {
+	const id = this.params.id;
+	const score = numberUtil.toInt(this.params.score);
+
+	yield VideoModel.update({_id: id}, {$set: {score: score}});
+	this.body = jsonUtil.createAPI(1);
+};
+
+exports.modifyVideoIsDesired = function *() {
+	const id = this.params.id;
+	const isDesired = numberUtil.toInt(this.params.isDesired) == 1;
+
+	yield VideoModel.update({_id: id}, {$set: {isDesired: isDesired}});
+	this.body = jsonUtil.createAPI(1);
 };

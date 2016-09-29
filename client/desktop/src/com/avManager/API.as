@@ -16,8 +16,8 @@ package com.avManager
 			return Config.instance.localServer;
 		}
 		
-		public static function getVideo(startIndex:int, count:int, sortType:int = 1, keyWord:String = "!"):String {
-			return getLocalServer() + "/getVideo/" + MathUtil.max(0, startIndex) + "/" + MathUtil.max(0, count) + "/" + sortType + "/" + encodeURIComponent(keyWord);
+		public static function getVideo(startIndex:int, count:int, sortType:int = 1, desired:Boolean = false, keyWord:String = "!"):String {
+			return getLocalServer() + "/getVideo/" + MathUtil.max(0, startIndex) + "/" + MathUtil.max(0, count) + "/" + sortType + "/" + (desired ? 1 : 0) + "/" + encodeURIComponent(keyWord);
 		}
 		
 		public static function addVideo(code:String, name:String, date:String, actressName:Vector.<String>, category:Vector.<String>, series:String = "undefined"):String{
@@ -36,7 +36,16 @@ package com.avManager
 			return getLocalServer() + "/filterVideoCode/" + codeList.join('&');
 		}
 		
+		public static function modifyVideoScore(id:String, score:int):String{
+			return getLocalServer() + "/modifyVideoScore/" + id + "/" + score;
+		}
+		
+		public static function modifyVideoIsDesired(id:String, isDesired:Boolean):String{
+			return getLocalServer() + "/modifyVideoIsDesired/" + id + "/" + (isDesired ? 1 : 0);
+		}
+		
 		//----------------------actress
+		
 		public static function getActress(startIndex:int, count:int, sortType:int = 1, keyWord:String = "!"):String {
 			return getLocalServer() + "/getActress/" + MathUtil.max(0, startIndex) + "/" + MathUtil.max(0, count) + "/" + sortType + "/" + encodeURIComponent(keyWord);
 		}
@@ -67,6 +76,27 @@ package com.avManager
 			birthdayStr = arr.join('-');
 			return getLocalServer() + "/modifyActress/" + id + "/" + encodeURIComponent(alias) + "/" + birthdayStr + "/" + height + "/" + bust + "/" + waist + "/" + hip + "/" + cup + "/" + score;
 		}
+		
+		public static function getLastestActressJavBusNum():String{
+			return getLocalServer() + "/getLastestActressJavBusNum";
+		}
+		
+		public static function addActress(name:String, alias:String, birthday:Date, height:int, bust:int, waist:int, hip:int, cup:String, javBusCode:String):String{
+			if(StringUtil.isNullOrEmpty(alias)){
+				alias = "!";
+			}
+			var birthdayStr:String = DateUtil.toString(birthday);
+			var arr:Array = birthdayStr.split('-');
+			arr[1] = int(arr[1]) - 1;
+			birthdayStr = arr.join('-');
+			cup = cup.toUpperCase();
+			if(StringUtil.isNullOrEmpty(cup)){
+				cup = "X";
+			}
+			return getLocalServer() + "/addActress/" + name + "/" + alias + "/" + birthdayStr + "/" + height + "/" + bust + "/" + waist + "/" + hip + "/" + cup + "/" + javBusCode;
+		}
+		
+		//---------------------category
 		
 		public static function getCategoryByID(ids:Vector.<String>):String{
 			var idStr:String = ids.join("&");

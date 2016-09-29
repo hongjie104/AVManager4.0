@@ -3,7 +3,7 @@
 			   xmlns:s="library://ns.adobe.com/flex/spark"
 			   xmlns:mx="library://ns.adobe.com/flex/mx"
 			   width="800" height="600" close="onCloseHandler(event)"
-			   creationComplete="onCreationCompleted(event)">
+			   creationComplete="onCreationCompleted(event)" title="抓取最新车辆信息">
 	<fx:Script>
 		<![CDATA[
 			import com.adobe.images.JPGEncoder;
@@ -26,7 +26,7 @@
 			// 等待获取数据的影片
 			private var _toFetchVideoList:Vector.<ToFetchVideoData> = new Vector.<ToFetchVideoData>();
 			
-			// 正在获取的硬盘索引值
+			// 正在获取的影片索引值
 			private var _curVideoIndex:int = 0;
 			
 			private var _totalVideoCount:int = 0;
@@ -43,6 +43,7 @@
 			}
 			
 			private function onCloseHandler(event:CloseEvent = null):void {
+				_loader.removeEventListener(Event.COMPLETE, onFetchPageHtml);
 				PopUpUtil.instance.removePopUp(this, 1);
 			}
 			
@@ -201,8 +202,8 @@
 	</fx:Declarations>
 	<s:VGroup width="100%" height="100%">
 		<s:HGroup width="100%">
-			<s:Button label="开始获取数据" click="onBeginFetch(event)"/>
-			<s:Button label="停止获取数据" click="onStopFetch(event)"/>
+			<s:Button label="开始抓取数据" click="onBeginFetch(event)"/>
+			<s:Button label="停止抓取数据" click="onStopFetch(event)"/>
 		</s:HGroup>
 		<s:TextArea id="_textArea" width="100%" height="100%" editable="false"/>
 	</s:VGroup>

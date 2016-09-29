@@ -9,15 +9,16 @@ let dateUtil      = require('../../../app/utils/dateUtil');
 
 let userSchema = new mongoose.Schema({
 	name: {type: String, required: true},
-	alias: {type: String, required: true},
-	birthday: {type: Date, default: new Date(1969, 12, 31)},
+	alias: {type: String, default: ""},
+	birthday: {type: Date, default: dateUtil.toMongoDate(new Date(1970, 1, 1))},
 	height: {type: Number, default: 0},
 	bust: {type: Number, default: 0},
 	waist: {type: Number, default: 0},
 	hip: {type: Number, default: 0},
 	cup: {type: String, default: "X"},
 	score: {type: Number, default: 0},
-	javBusCode: {type: String, require: true}
+	javBusCode: {type: String, require: true},
+	javBusNum: {type: Number, default: 0}
 }, {collection: "actress"});
 
 // /**

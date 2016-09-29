@@ -46,7 +46,7 @@
 				if(StringUtil.isNullOrEmpty(code)) {
 					code = "!";
 				}
-				Net.instance.fetch(API.getVideo((_curPage - 1) * _COUNT, _COUNT, this._sortTypeComboBox.selectedIndex + 1, code), onFetchVideo);
+				Net.instance.fetch(API.getVideo((_curPage - 1) * _COUNT, _COUNT, this._sortTypeComboBox.selectedIndex + 1, _desiredCheckBox.selected, code), onFetchVideo);
 			}
 			
 			private function onFetchVideo(data:Object):void{
@@ -122,7 +122,6 @@
 					this._curPage--;
 					fetchVideo();
 				}
-				
 			}
 			
 			protected function onNextPage(event:MouseEvent):void
@@ -140,6 +139,12 @@
 			}
 			
 			protected function onSortTypeComboBoxChanged(event:IndexChangeEvent):void
+			{
+				this._curPage = 1;
+				fetchVideo();
+			}
+			
+			protected function onDesiredCheckBoxChanged(event:Event):void
 			{
 				this._curPage = 1;
 				fetchVideo();
@@ -165,6 +170,7 @@
 					<fx:String>按番号升序</fx:String>
 				</s:ArrayCollection>
 			</s:ComboBox>
+			<s:CheckBox id="_desiredCheckBox" label="仅显示愿望清单" change="onDesiredCheckBoxChanged(event)"/>
 		</s:HGroup>
 		<s:HGroup width="50%" height="100%" horizontalAlign="right" paddingRight="6"
 				  verticalAlign="middle">

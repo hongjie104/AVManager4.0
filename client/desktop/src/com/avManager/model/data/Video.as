@@ -17,9 +17,21 @@ package com.avManager.model.data
 		
 		private var _score:int;
 		
+		private var _isDesired:Boolean;
+		
 		public function Video()
 		{
 			super();
+		}
+
+		public function get isDesired():Boolean
+		{
+			return _isDesired;
+		}
+
+		public function set isDesired(value:Boolean):void
+		{
+			_isDesired = value;
 		}
 
 		public function get score():int
@@ -90,6 +102,7 @@ package com.avManager.model.data
 			actress = arrToVector(json.actress);
 			series = json.series;
 			score = json.score;
+			isDesired = json.isDesired == 1;
 		}
 		
 		private function arrToVector(arr:Array):Vector.<String> {

@@ -24,7 +24,7 @@
 				if(value) {
 					this.visible = true;
 					_nameLabel.text = value.name;
-					var f:File = new File(Config.instance.actressPath + "/" + value.javBusCode + "/" + value.javBusCode + ".jpg");
+					var f:File = new File(Config.instance.actressPath + File.separator + value.javBusCode + File.separator + value.javBusCode + ".jpg");
 					if(f.exists) {
 						_img.source = f.nativePath;
 					} else {

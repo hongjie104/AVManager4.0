@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
-		 xmlns:s="library://ns.adobe.com/flex/spark" 
-		 xmlns:mx="library://ns.adobe.com/flex/mx" width="125" height="145" xmlns:actress="com.avManager.view.actress.*" xmlns:container="com.avManager.view.actress.container.*">
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009"
+		 xmlns:s="library://ns.adobe.com/flex/spark"
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 xmlns:actress="com.avManager.view.actress.*"
+		 xmlns:container="com.avManager.view.actress.container.*"
+		 width="125" height="145">
 	<fx:Script>
 		<![CDATA[
 			import com.avManager.model.data.Actress;
@@ -41,5 +44,6 @@
 		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
 	</fx:Declarations>
 	<container:ActressCell id="_cell"/>
-	<s:Image id="_selectedImg" visible="false" width="32" height="32" x="{this.width - 32}" y="{this.height - 32 - 20}" source="@Embed('assets/selected.png')"/>
+	<s:Image id="_selectedImg" visible="false" x="{this.width - 32}" y="{this.height - 32 - 20}"
+			 width="32" height="32" source="@Embed('assets/selected.png')"/>
 </s:Group>

@@ -125,3 +125,28 @@ exports.modifyActress = function *() {
 	let a = yield ActressModel.findOne({_id: this.params.id});
 	this.body = jsonUtil.createAPI(1, jsonUtil.actress2Json(a));
 };
+
+exports.getLastestActressJavBusNum = function *() {
+	let actress = yield ActressModel.find({}, {javBusNum: 1}).sort({javBusNum: -1}).limit(1);
+	this.body = jsonUtil.createAPI(1, actress.length > 0 ? actress[0].javBusNum : 0);
+};
+
+exports.addActress = function *() {
+	let arr = this.params.birthday.split('-');
+	const birthday = dateUtil.toMongoDate(new Date(arr[0], arr[1], arr[2]));
+
+	let actress = new ActressModel({
+		name: this.params.name,
+		alias: this.params.alias === "!" ? "" : this.params.alias,
+		birthday: birthday,
+		height: numberUtil.toInt(this.params.height),
+		bust: numberUtil.toInt(this.params.bust),
+		waist: numberUtil.toInt(this.params.waist),
+		hip: numberUtil.toInt(this.params.hip),
+		cup: this.params.cup,
+		javBusCode: this.params.javBusCode,
+		javBusNum: parseInt(this.params.javBusCode, 36)
+	});
+	yield actress.save();
+	this.body = jsonUtil.createAPI(1, jsonUtil.actress2Json(actress));
+};
