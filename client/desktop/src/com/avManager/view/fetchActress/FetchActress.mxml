@@ -2,12 +2,14 @@
 <s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009"
 			   xmlns:s="library://ns.adobe.com/flex/spark"
 			   xmlns:mx="library://ns.adobe.com/flex/mx"
-			   width="800" height="600" close="onCloseHandler(event)" title="抓取最新女司机信息" creationComplete="onCreationCompleted(event)">
+			   width="800" height="600" close="onCloseHandler(event)"
+			   creationComplete="onCreationCompleted(event)" title="抓取最新女司机信息">
 	<fx:Script>
 		<![CDATA[
 			import com.adobe.images.JPGEncoder;
 			import com.avManager.API;
 			import com.avManager.Net;
+			import com.avManager.Utils;
 			import com.avManager.model.Config;
 			
 			import mx.controls.Alert;
@@ -56,87 +58,44 @@
 				var code:String = _curNum.toString(36);
 				_toFetchActress.javBusCode = code;
 				_textArea.appendText("======开始获取编码为" + code + "的数据======\n");
-				var r:URLRequest = new URLRequest(Config.instance.webURL + "/star/" + code);
-				_loader.load(r);
+				_loader.load(new URLRequest(Config.instance.webURL + "/star/" + code));
 			}
 			
 			private function onFetchActressHtml(evt:Event):void{
 				var html:String = _loader.data.toString();
-				/*
-				<div class="avatar-box">
-				<div class="photo-frame">
-				<img src="https://pics.javbus.info/actress/2jv_a.jpg" title="波多野結衣">
-				</div>
-				<div class="photo-info">
-				<span class="pb10">波多野結衣</span>                        <p>生日: 1988-05-24</p>                        <p>年齡: 26</p>                         <p>身高: 163cm</p>  
-				<p>罩杯: D</p>  
-				<p>胸圍: 88cm</p>  
-				<p>腰圍: 59cm</p>  
-				<p>臀圍: 85cm</p>  
-				<p>出生地: 京都府</p>  
-				<p>愛好: ゲーム</p>                     </div>
-				</div>
-				</div>        
-				
-				*/
-				
-				var arr:Array = html.match(/<div class="avatar-box">\s*<div class="photo-frame">\s*<img src.*\s*<\/div>\s*<div class="photo-info">\s*<span clas.*\s*(<p>.*\s*)*<\/div/);
-				if(arr){
-					var avatarHtml:String = arr[0];
-					var s:String = avatarHtml.replace(/                        /g, "\n");
-					arr = s.match(/<p>.*<\/p>/g);
-					var arr1:Array;
-					for each(s in arr){
-						s = s.replace(/<\/?p>/g, "");
-						/*
-						生日: 1978-08-31
-						年齡: 36
-						身高: 160cm
-						罩杯: F
-						胸圍: 86cm
-						腰圍: 60cm
-						臀圍: 88cm
-						愛好: スポーツ全般
-						*/
-						arr1 = s.split(": ");
-						if(arr1[0] == "生日"){
-							var arr2:Array = arr1[1].split("-");
-							_toFetchActress.birthday = new Date(arr2[0], int(arr2[1]) - 1, arr2[2]);
-						} else if(arr1[0] == "身高"){
-							_toFetchActress.height = int(arr1[1].replace("cm", ""));
-						} else if(arr1[0] == "罩杯"){
-							_toFetchActress.cup = arr1[1];
-						} else if(arr1[0] == "胸圍"){
-							_toFetchActress.bust = int(arr1[1].replace("cm", ""));
-						} else if(arr1[0] == "腰圍"){
-							_toFetchActress.waist = int(arr1[1].replace("cm", ""));
-						} else if(arr1[0] == "臀圍"){
-							_toFetchActress.hip = int(arr1[1].replace("cm", ""));
-						}
-					}
-					
-					// 取出名字和别名
-					arr = avatarHtml.match(/<img src.*">/)[0].split(' ');
-					// <img,src="https://pics.javbus.info/actress/1_a.jpg",title="坂上友香">
-					s = arr[2].toString().replace("title=\"", "").replace("\">", "");
-					if(s.indexOf("（") != -1){
-						_toFetchActress.name = arr1[0];
-						arr1 = s.replace("）", "").split("（");
-						_toFetchActress.alias = arr1[1].toString().replace("、", "|").replace("，", "|");
-					} else {
-						_toFetchActress.name = s;
-					}
+				var actressObj:Object = Utils.fetchActressDataFromHtml(html);
+				if(actressObj.name == "") {
+					_textArea.appendText(_toFetchActress.javBusCode + "页面有问题，继续抓取下一个\n");
+					_curNum++;
+					fetchActressHtml();
+				} else {
+					_toFetchActress.alias = actressObj.alias;
+					_toFetchActress.birthday = actressObj.birthday;
+					_toFetchActress.bust = actressObj.bust;
+					_toFetchActress.cup = actressObj.cup;
+					_toFetchActress.height = actressObj.height;
+					_toFetchActress.hip = actressObj.hip;
+					_toFetchActress.name = actressObj.name;
+					_toFetchActress.waist = actressObj.waist;
 					
 					_textArea.appendText("开始获取头像\n");
 					// 保存头像
 					var loader:Loader = new Loader();
 					loader.contentLoaderInfo.addEventListener(Event.COMPLETE, onLoadImg);
 					loader.contentLoaderInfo.addEventListener(IOErrorEvent.IO_ERROR, onFetchImgError);
+					loader.load(new URLRequest(actressObj.img));
+/*
+<<<<<<< HEAD
+					
 					loader.load(new URLRequest(arr[1].toString().replace("src=\"", "").replace("\"", "")));					
 				} else {
 					_textArea.appendText(_toFetchActress.javBusCode + "页面有问题，继续抓取下一个\n");
 					_curNum++;
 					fetchActressHtml();
+=======
+						
+>>>>>>> ac0d926aa9df9cc524a3a28813d689cd571f6903
+*/
 				}
 			}
 			
@@ -200,6 +159,6 @@
 		<s:HGroup width="100%" height="26">
 			<s:Button label="开始抓取" click="onStartFetch(event)"/>
 		</s:HGroup>
-		<s:TextArea id="_textArea" editable="false" width="100%" height="100%"/>
+		<s:TextArea id="_textArea" width="100%" height="100%" editable="false"/>
 	</s:VGroup>
 </s:TitleWindow>

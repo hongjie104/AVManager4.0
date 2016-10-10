@@ -10,6 +10,7 @@
 			import com.avManager.API;
 			import com.avManager.Net;
 			import com.avManager.model.data.Actress;
+			import com.avManager.view.fetchActressVideo.FetchActressVideo;
 			import com.avManager.view.video.container.VideoCell;
 			
 			import mx.events.CloseEvent;
@@ -28,6 +29,7 @@
 			[Bindable]
 			private var _totalPage:int;
 			
+			[Bindable]
 			private var _totalCount:int;
 			
 			public function get actress():Actress
@@ -47,7 +49,7 @@
 			
 			protected function onCreationCompleted(event:FlexEvent):void
 			{
-				renderActressCell();				
+				renderActressCell();
 			}
 			
 			private function renderActressCell():void{
@@ -132,6 +134,12 @@
 				toModifyActress();
 			}
 			
+			protected function onFetchData(event:MouseEvent):void
+			{
+				var fetchActressVideo:FetchActressVideo = new FetchActressVideo();
+				fetchActressVideo.actress = actress;
+				PopUpUtil.instance.addPopUp(fetchActressVideo, this, true, 1);
+			}
 		]]>
 	</fx:Script>
 	<fx:Declarations>
@@ -143,8 +151,8 @@
 			<s:Label id="_nameLabel" width="120" fontWeight="bold" verticalAlign="middle"/>
 			<s:TextInput id="_aliasInput" width="300" prompt="女司机别名" toolTip="女司机别名，用|分隔"/>
 			<s:Button label="修改别名" click="onModifyAlias(event)"/>
-			<mx:VRule height="100%"/>
-			<s:Button label="更新"/>
+			<mx:VRule height="80%"/>
+			<s:Button label="抓取数据" click="onFetchData(event)"/>
 			<s:HGroup width="100%" height="100%" horizontalAlign="right" verticalAlign="middle">
 				<s:ComboBox id="_sortTypeComboBox" width="86"
 							change="onSortTypeComboBoxChanged(event)"
@@ -161,7 +169,7 @@
 				</s:ComboBox>
 				<s:Button label="前一页" click="onPrevPage(event)"/>
 				<s:Button label="后一页" click="onNextPage(event)"/>
-				<s:Label height="100%" text="{this._curPage}/{this._totalPage}"
+				<s:Label height="100%" text="{this._curPage}/{this._totalPage}(车辆总数:{this._totalCount})"
 						 verticalAlign="middle"/>
 			</s:HGroup>
 		</s:HGroup>
