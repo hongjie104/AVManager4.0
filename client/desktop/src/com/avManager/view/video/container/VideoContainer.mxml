@@ -111,9 +111,11 @@
 			}
 			
 			private function onVideoEvent(evt:com.avManager.events.VideoEvent):void{
-				var videoDetail:VideoDetail = new VideoDetail();
-				videoDetail.video = evt.video;
-				PopUpUtil.instance.addPopUp(videoDetail, this, true, 1);
+				if(evt.video){
+					var videoDetail:VideoDetail = new VideoDetail();
+					videoDetail.video = evt.video;
+					PopUpUtil.instance.addPopUp(videoDetail, this, true, 1);	
+				}
 			}
 			
 			protected function onPrevPage(event:MouseEvent):void

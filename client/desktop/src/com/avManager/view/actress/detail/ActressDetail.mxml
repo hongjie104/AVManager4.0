@@ -143,6 +143,8 @@
 			<s:Label id="_nameLabel" width="120" fontWeight="bold" verticalAlign="middle"/>
 			<s:TextInput id="_aliasInput" width="300" prompt="女司机别名" toolTip="女司机别名，用|分隔"/>
 			<s:Button label="修改别名" click="onModifyAlias(event)"/>
+			<mx:VRule height="100%"/>
+			<s:Button label="更新"/>
 			<s:HGroup width="100%" height="100%" horizontalAlign="right" verticalAlign="middle">
 				<s:ComboBox id="_sortTypeComboBox" width="86"
 							change="onSortTypeComboBoxChanged(event)"

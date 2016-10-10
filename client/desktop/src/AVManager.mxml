@@ -38,7 +38,8 @@
 			
 			private function test(...args):void {
 				var loader:URLLoader = new URLLoader();
-				loader.load(new URLRequest("https://www.javbus5.com/ajax/uncledatoolsbyajax.php?gid=32451078852&lang=zh&img=https://pics.javbus.info/cover/5p4b_b.jpg&uc=0&floor=359"));
+//				loader.load(new URLRequest("https://www.javbus5.com/ajax/uncledatoolsbyajax.php?gid=32451078852&lang=zh&img=https://pics.javbus.info/cover/5p4b_b.jpg&uc=0&floor=359"));
+				loader.load(new URLRequest("http://www.177pic66.com/"));
 				loader.addEventListener(Event.COMPLETE, onLoaded);
 //				Net.instance.fetch(API.getActress(2, "001dce0230ba5c382e5c0000"), this.onLoaded);
 			}

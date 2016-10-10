@@ -131,6 +131,7 @@
 					// 保存头像
 					var loader:Loader = new Loader();
 					loader.contentLoaderInfo.addEventListener(Event.COMPLETE, onLoadImg);
+					loader.contentLoaderInfo.addEventListener(IOErrorEvent.IO_ERROR, onFetchImgError);
 					loader.load(new URLRequest(arr[1].toString().replace("src=\"", "").replace("\"", "")));					
 				} else {
 					_textArea.appendText(_toFetchActress.javBusCode + "页面有问题，继续抓取下一个\n");
@@ -150,9 +151,17 @@
 				}
 			}
 			
+			private function onFetchImgError(evt:IOErrorEvent):void{
+				var loaderInfo:LoaderInfo = evt.target as LoaderInfo;
+				loaderInfo.removeEventListener(Event.COMPLETE, onLoadImg);
+				loaderInfo.removeEventListener(IOErrorEvent.IO_ERROR, onFetchImgError);
+				Alert.show(evt.text);
+			}
+			
 			private function onLoadImg(evt:Event):void{
 				var loaderInfo:LoaderInfo = evt.target as LoaderInfo;
 				loaderInfo.removeEventListener(Event.COMPLETE, onLoadImg);
+				loaderInfo.removeEventListener(IOErrorEvent.IO_ERROR, onFetchImgError);
 				
 				var bmd:BitmapData = new BitmapData(loaderInfo.width, loaderInfo.height);
 				bmd.draw(loaderInfo.loader);

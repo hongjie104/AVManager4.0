@@ -1,12 +1,12 @@
 package com.avManager
 {
 	import com.adobe.serialization.json.JSONDecoder;
-	import com.adobe.serialization.json.JSONEncoder;
 	
 	import flash.events.Event;
 	import flash.events.IOErrorEvent;
 	import flash.net.URLLoader;
 	import flash.net.URLRequest;
+	import flash.net.URLVariables;
 	
 	import mx.controls.Alert;
 
@@ -40,7 +40,7 @@ package com.avManager
 		}
 		
 		private function onIOError(evt:IOErrorEvent):void{
-			
+			Alert.show(evt.text, "错误");
 		}
 		
 		public function fetch(api:String, cb:Function = null):void{

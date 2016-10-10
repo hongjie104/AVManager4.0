@@ -15,6 +15,10 @@ router.get('', function *(next) {
 	});
 });
 
+// router.get('crossdomain.xml', function *() {
+// 	this.body = '<?xml version="1.0" encoding="UTF-8" ?><cross-domain-policy><site-control permitted-cross-domain-policies="all" /><allow-access-from domain="*" /><allow-http-request-headers-from domain="*" headers="*" /></cross-domain-policy>';
+// });
+
 router.get('actress', actressController.index);
 
 router.get('getActress/:startIndex/:count/:sortType/:keyWord', actressController.getActress);
@@ -61,7 +65,7 @@ router.get('36To10/:str', function *() {
 */
 
 router.get('aaa', function *() {
-	let actresses = yield ActressModel.find({_id: {$in: ["0b58ce0230ba5c382e268200", "0a58ce0230ba5c382e258200", "0958ce0230ba5c382e248200"]}}, {javBusCode: 1});
+	let actresses = yield ActressModel.find({}, {javBusCode: 1});
 	let num = 0, result = "";
 	for (let i = 0; i < actresses.length; i++) {
 		num = parseInt(actresses[i].javBusCode, 36);

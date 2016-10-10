@@ -32,16 +32,16 @@
 				_video = value;
 				if(value) {
 					_infoLabel.text = value.code + " / " + DateUtil.toString(value.date);
-					var f:File;
-					var imgName:String = File.separator + value.code + File.separator + value.code + "s.jpg";
-					var pathArr:Array = Config.getVideoPath();
-					for each(var p:String in pathArr) {
-						f = new File(p + imgName);
-						if(f.exists) {
-							_img.source = f.nativePath;
-							break;
-						}
-					}
+//					var f:File;
+//					var imgName:String = File.separator + value.code + File.separator + value.code + "s.jpg";
+//					var pathArr:Array = Config.getVideoPath();
+//					for each(var p:String in pathArr) {
+//						f = new File(p + imgName);
+//						if(f.exists) {
+//							_img.source = f.nativePath;
+//							break;
+//						}
+//					}
 					_starBar.score = value.score;
 					this.visible = true;
 				} else {
