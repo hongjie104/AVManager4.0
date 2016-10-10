@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009"
+			   xmlns:s="library://ns.adobe.com/flex/spark"
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   width="800" height="600" addedToStage="onAddedToStage(event)"
+			   close="onCloseHandler(event)" creationComplete="onCreationCompleted(event)"
+			   title="抓取女司机的车">
+	<fx:Script>
+		<![CDATA[
+			import com.adobe.images.JPGEncoder;
+			import com.avManager.API;
+			import com.avManager.Net;
+			import com.avManager.Utils;
+			import com.avManager.model.Config;
+			import com.avManager.model.data.Actress;
+			
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			
+			import org.libra.flex.utils.PopUpUtil;
+			
+			private var _loader:URLLoader;
+			
+			private var _curPage:int = 1;
+			
+			private var _toFetchVideoArr:Array;
+			
+			private var _curVideoIndex:int = 0;
+			
+			private var _totalVideoCount:int = 0;
+			
+			private var _filterVideoCodeArr:Array;
+			
+			private var _isLoadingBigImg:Boolean = false;
+			
+			private var _videoBigImg:String;
+			
+			private var _actress:Actress;
+			
+			public function get actress():Actress
+			{
+				return _actress;
+			}
+
+			public function set actress(value:Actress):void
+			{
+				_actress = value;
+			}
+
+			private function onCloseHandler(event:CloseEvent = null):void {
+				_loader.removeEventListener(IOErrorEvent.IO_ERROR, onIOError);
+				PopUpUtil.instance.removePopUp(this, 1);
+			}
+			
+			protected function onCreationCompleted(event:FlexEvent):void
+			{
+				_loader = new URLLoader();
+				_loader.addEventListener(IOErrorEvent.IO_ERROR, onIOError);
+				
+				_textArea.appendText("开始抓取" + actress.name + "的车辆信息\n");
+				fetchPageHtml();
+			}
+			
+			private function fetchPageHtml():void{
+				_textArea.appendText("============开始获取第" + _curPage + "页\n");
+				_loader.addEventListener(Event.COMPLETE, onFetchActressHtml);
+				var r:URLRequest = new URLRequest(Config.instance.webURL + "/star/" + actress.javBusCode + "/" + _curPage);
+				r.requestHeaders = new Array(new URLRequestHeader("Cookie", "existmag=all"));
+				r.manageCookies = false;
+				_loader.load(r);
+			}
+			
+			private function onFetchActressHtml(evt:Event):void{
+				_textArea.appendText("获取完毕,过滤掉已有车辆的信息\n");
+				_loader.removeEventListener(Event.COMPLETE, onFetchActressHtml);
+				var html:String = _loader.data;
+				if(_curPage == 1){
+//					var actressObj:Object = Utils.fetchActressDataFromHtml(html);					
+				}
+				_toFetchVideoArr = Utils.fetchActressVideoesFromHtml(html);
+				var codeList:Vector.<String> = new Vector.<String>();
+				for each(var videoObj:Object in _toFetchVideoArr) {
+					codeList.push(videoObj.code);
+				}
+				Net.instance.fetch(API.filterVideoCode(codeList), onFilterVideoCode);
+			}
+			
+			private function onFilterVideoCode(codeArr:Array):void{
+				_textArea.appendText("过滤完毕,需要获取的车辆信息有" + codeArr.length + "个\n");
+				_filterVideoCodeArr = codeArr;
+				_loader.addEventListener(Event.COMPLETE, onFetchVideoHtml);
+				_totalVideoCount = _filterVideoCodeArr.length;
+				_curVideoIndex = 0;
+				if(_totalVideoCount > 0){
+					fetchVideoHtml();	
+				} else {
+					// 继续下一页
+					_loader.removeEventListener(Event.COMPLETE, onFetchVideoHtml);
+					_curPage++;
+					fetchPageHtml();
+				}
+			}
+			
+			private function fetchVideoHtml():void{
+				_textArea.appendText("======开始获取车辆详情=>" + _curVideoIndex + "/" + _totalVideoCount + "\n");
+				_loader.load(new URLRequest(getVideoUrl(_filterVideoCodeArr[_curVideoIndex])));
+			}
+			
+			private function onFetchVideoHtml(evt:Event):void{
+				var dataObject:Object = Utils.fetchVideoDataFromHtml(_loader.data);
+				_videoBigImg = _loader.data.match(/<a class="bigImage" href=".*"><img/)[0].toString().replace('<a class="bigImage" href="', '').replace('"><img', '');
+				_textArea.appendText("添加车辆[" + dataObject.code + "]到数据库中\n");
+				Net.instance.fetch(API.addVideo(dataObject.code, dataObject.name, dataObject.dateString, dataObject.actress, dataObject.category, dataObject.series), this.onAddedVideo);
+			}
+			
+			private function onAddedVideo(videoObj:Object):void{
+//				_textArea.appendText("写入数据库成功\n");
+				loadImg(true);
+			}
+			
+			private function loadImg(isBig:Boolean):void{
+				_isLoadingBigImg = isBig;
+				var loader:Loader = new Loader();
+				loader.contentLoaderInfo.addEventListener(Event.COMPLETE, onLoadImg);
+				if(isBig){
+					_textArea.appendText("开始下载大图\n");
+					loader.load(new URLRequest(_videoBigImg));
+				} else {
+					_textArea.appendText("开始下载小图\n");
+					loader.load(new URLRequest(getVideoImg(_filterVideoCodeArr[_curVideoIndex])));
+				}
+			}
+			
+			private function onLoadImg(evt:Event):void{
+				var loaderInfo:LoaderInfo = evt.target as LoaderInfo;
+				loaderInfo.removeEventListener(Event.COMPLETE, onLoadImg);
+				
+				if(saveImg(loaderInfo.loader, _isLoadingBigImg)){
+					if(_isLoadingBigImg){
+						loadImg(false);	
+					} else {
+						if(++_curVideoIndex >= _totalVideoCount){
+							_textArea.appendText("这一页车辆数据获取完毕，开始下一页\n");
+							// 这一页完了，继续下一页
+							_loader.removeEventListener(Event.COMPLETE, onFetchVideoHtml);
+							_curPage++;
+							fetchPageHtml();
+						} else {
+							fetchVideoHtml();
+						}
+					}
+				}
+			}
+			
+			private function onIOError(evt:IOErrorEvent):void{
+				_loader.removeEventListener(Event.COMPLETE, onFetchActressHtml);
+				if(_loader.data.toString().indexOf("404 Page Not Found!") != -1){
+					Alert.show("抓取完毕");
+				} else {
+					Alert.show(evt.text, "错误");	
+				}
+			}
+			
+			protected function onAddedToStage(event:Event):void
+			{
+				
+			}
+			
+			private function getVideoUrl(code:String):String {
+				for each(var o:Object in _toFetchVideoArr){
+					if(o.code == code) {
+						return o.url;
+					}
+				}
+				return null;
+			}
+			
+			private function getVideoImg(code:String):String{
+				for each(var o:Object in _toFetchVideoArr){
+					if(o.code == code) {
+						return o.img;
+					}
+				}
+				return null;
+			}
+			
+			private function saveImg(loader:Loader, isBig:Boolean = true):Boolean{
+				var bmd:BitmapData = new BitmapData(loader.contentLoaderInfo.width, loader.contentLoaderInfo.height);
+				bmd.draw(loader);
+				
+				var code:String = _filterVideoCodeArr[_curVideoIndex];
+				var encoder:JPGEncoder = new JPGEncoder(60);
+				try{
+					var fl:File = new File(Config.getVideoPath()[0] + File.separator + code + File.separator + code + (isBig ? "l.jpg" : "s.jpg"));
+					if(!fl.exists){
+						var fs:FileStream = new FileStream();
+						//open file in write mode
+						fs.open(fl, FileMode.WRITE);
+						//write bytes from the byte array
+						fs.writeBytes(encoder.encode(bmd));
+						//close the file
+						fs.close();						
+					}
+					
+				}catch(e:Error){
+					Alert.show(e.message);
+					return false;
+				}
+				return true;
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	<s:VGroup width="100%" height="100%">
+		<s:HGroup width="100%" height="26">
+			<s:Button label="tttt"/>
+		</s:HGroup>
+		<s:TextArea id="_textArea" width="100%" height="100%" editable="false"/>
+	</s:VGroup>
+</s:TitleWindow>

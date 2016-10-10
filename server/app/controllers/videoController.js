@@ -121,7 +121,7 @@ exports.addActressToVideo = function *() {
 
 exports.filterVideoCode = function *() {
 	const codeArr = this.params.codeList.split('&');
-	let videoes = yield VideoModel.find({code: {$in: [codeArr]}}, {code: 1});
+	let videoes = yield VideoModel.find({code: {$in: codeArr}}, {code: 1});
 	for (let i = 0; i < videoes.length; i++) {
 		codeArr.splice(codeArr.indexOf(videoes[i].code), 1);
 	}

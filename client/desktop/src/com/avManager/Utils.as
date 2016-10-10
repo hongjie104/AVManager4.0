@@ -111,5 +111,124 @@ package com.avManager
 			}
 			fetchMagnetCallBack.call(thisArg, magnetList);
 		}
+		
+		public static function fetchActressDataFromHtml(html:String):Object{
+			/*
+			<div class="avatar-box">
+			<div class="photo-frame">
+			<img src="https://pics.javbus.info/actress/2jv_a.jpg" title="波多野結衣">
+			</div>
+			<div class="photo-info">
+			<span class="pb10">波多野結衣</span>                        <p>生日: 1988-05-24</p>                        <p>年齡: 26</p>                         <p>身高: 163cm</p>  
+			<p>罩杯: D</p>  
+			<p>胸圍: 88cm</p>  
+			<p>腰圍: 59cm</p>  
+			<p>臀圍: 85cm</p>  
+			<p>出生地: 京都府</p>  
+			<p>愛好: ゲーム</p>                     </div>
+			</div>
+			</div>        
+			
+			*/
+			var birthday:Date = new Date();
+			var height:int = 0;
+			var cup:String = "X";
+			var bust:int = 0;
+			var waist:int = 0;
+			var hip:int = 0;
+			var name:String = "";
+			var alias:String = "";
+			
+			var arr:Array = html.match(/<div class="avatar-box">\s*<div class="photo-frame">\s*<img src.*\s*<\/div>\s*<div class="photo-info">\s*<span clas.*\s*(<p>.*\s*)*<\/div/);
+			if(arr){
+				var avatarHtml:String = arr[0];
+				var s:String = avatarHtml.replace(/                        /g, "\n");
+				arr = s.match(/<p>.*<\/p>/g);
+				var arr1:Array;
+				for each(s in arr){
+					s = s.replace(/<\/?p>/g, "");
+					/*
+					生日: 1978-08-31
+					年齡: 36
+					身高: 160cm
+					罩杯: F
+					胸圍: 86cm
+					腰圍: 60cm
+					臀圍: 88cm
+					愛好: スポーツ全般
+					*/
+					arr1 = s.split(": ");
+					if(arr1[0] == "生日"){
+						var arr2:Array = arr1[1].split("-");
+						birthday = new Date(arr2[0], int(arr2[1]) - 1, arr2[2]);
+					} else if(arr1[0] == "身高"){
+						height = int(arr1[1].replace("cm", ""));
+					} else if(arr1[0] == "罩杯"){
+						cup = arr1[1];
+					} else if(arr1[0] == "胸圍"){
+						bust = int(arr1[1].replace("cm", ""));
+					} else if(arr1[0] == "腰圍"){
+						waist = int(arr1[1].replace("cm", ""));
+					} else if(arr1[0] == "臀圍"){
+						hip = int(arr1[1].replace("cm", ""));
+					}
+				}
+				
+				// 取出名字和别名
+				arr = avatarHtml.match(/<img src.*">/)[0].split(' ');
+				// <img,src="https://pics.javbus.info/actress/1_a.jpg",title="坂上友香">
+				s = arr[2].toString().replace("title=\"", "").replace("\">", "");
+				if(s.indexOf("（") != -1){
+					name = arr1[0];
+					arr1 = s.replace("）", "").split("（");
+					alias = arr1[1].toString().replace("、", "|").replace("，", "|");
+				} else {
+					name = s;
+				}
+			}
+			return {
+				name: name,
+				alias: alias,
+				birthday: birthday,
+				height: height,
+				cup: cup,
+				bust: bust,
+				waist: waist,
+				hip: hip,
+				img: arr[1].toString().replace("src=\"", "").replace("\"", "")
+			};
+		}
+		
+		public static function fetchActressVideoesFromHtml(html:String):Array{
+			/*
+			<a class="movie-box" href="https://www.javbus.me/OOMN-184">
+			<div class="photo-frame">
+			<img src="https://pics.javbus.info/thumb/5pfr.jpg" title="唾液と愛液の絡み合う接吻セックス">
+			</div>                     
+			<div class="photo-info">                                   
+			<span>唾液と愛液の絡み合う接吻セックス<br />
+			<div class="item-tag">
+			</div>                        	
+			<date>OOMN-184</date> / <date>2016-10-29</date></span>
+			</div>
+			</a>
+			*/
+			var result:Array = [];
+			var arr:Array = html.match(/<a class="movie-box".*\s*<div class="photo-frame">\s*<img src=.*/g);
+			var url:String;
+			var a:Array;
+			var code:String;
+			for each(var str:String in arr) {
+				url = str.match(/<a class="movie-box".*/)[0].toString().replace('<a class="movie-box" href="', '').replace('">', '');
+				a = url.split('/');
+				code = a[a.length - 1].toString().replace('">', '');
+				result.push({
+					url: url,
+					img: str.match(/<img src=.*/)[0].toString().replace('<img src="', '').replace(/" title=".*/, ''),
+					code: code
+				});
+			}
+			return result;
+		}
 	}
 }
