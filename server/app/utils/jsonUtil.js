@@ -5,8 +5,8 @@ let dateUtil  = require('./dateUtil');
 let numberUtil = require('./numberUtil');
 
 exports.myDecodeURIComponent = function (str) {
-	return decodeURIComponent(str).replace(/`/g, "%");
-	return decodeURIComponent(escape(str));
+	return decodeURIComponent(str).replace(/\*/g, "%").replace(/\^/g, '/');
+	// return decodeURIComponent(escape(str));
 };
 
 exports.createAPI = function (status, jsonData) {

@@ -190,7 +190,7 @@
 				bmd.draw(loader);
 				
 				var code:String = _filterVideoCodeArr[_curVideoIndex];
-				var encoder:JPGEncoder = new JPGEncoder(60);
+				var encoder:JPGEncoder = new JPGEncoder(80);
 				try{
 					var fl:File = new File(Config.getVideoPath()[0] + File.separator + code + File.separator + code + (isBig ? "l.jpg" : "s.jpg"));
 					if(!fl.exists){

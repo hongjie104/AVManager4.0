@@ -84,24 +84,12 @@
 					loader.contentLoaderInfo.addEventListener(Event.COMPLETE, onLoadImg);
 					loader.contentLoaderInfo.addEventListener(IOErrorEvent.IO_ERROR, onFetchImgError);
 					loader.load(new URLRequest(actressObj.img));
-/*
-<<<<<<< HEAD
-					
-					loader.load(new URLRequest(arr[1].toString().replace("src=\"", "").replace("\"", "")));					
-				} else {
-					_textArea.appendText(_toFetchActress.javBusCode + "页面有问题，继续抓取下一个\n");
-					_curNum++;
-					fetchActressHtml();
-=======
-						
->>>>>>> ac0d926aa9df9cc524a3a28813d689cd571f6903
-*/
 				}
 			}
 			
 			private function onIOError(evt:IOErrorEvent):void{
 				// 这个编号是空的，可能是因为没了，也可能是因为javbus网站数据库的问题，所以再试一下下一个编号，如果下一个编号还是没有，那么认为的确是没了
-				if(_checkCount++ < 100){
+				if(_checkCount++ < 30){
 					_textArea.appendText("编号" + _curNum.toString(36) + "为空页面，试一下下一个编码\n");
 					_curNum++;
 					fetchActressHtml();
@@ -125,7 +113,7 @@
 				var bmd:BitmapData = new BitmapData(loaderInfo.width, loaderInfo.height);
 				bmd.draw(loaderInfo.loader);
 				
-				var encoder:JPGEncoder = new JPGEncoder(60);
+				var encoder:JPGEncoder = new JPGEncoder(80);
 				try{
 					var fl:File = new File(Config.instance.actressPath + File.separator + _toFetchActress.javBusCode + File.separator + _toFetchActress.javBusCode + ".jpg");
 					if(!fl.exists){

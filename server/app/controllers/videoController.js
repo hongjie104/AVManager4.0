@@ -15,6 +15,7 @@ exports.getVideo = function *() {
 	const sortType = numberUtil.toInt(this.params.sortType);
 	const desired = numberUtil.toInt(this.params.desired) === 1;
 	const keyWord = jsonUtil.myDecodeURIComponent(this.params.keyWord);
+	console.log(keyWord);
 
 	let condition = {};
 	if (keyWord !== "!") {

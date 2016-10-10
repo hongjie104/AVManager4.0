@@ -39,7 +39,7 @@ router.get('addActress/:name/:alias/:birthday/:height/:bust/:waist/:hip/:cup/:ja
 
 router.get('getVideo/:startIndex/:count/:sortType/:desired/:keyWord', videoController.getVideo);
 
-router.get('addVideo/:code/:name/:date/:actress/:series/:category', videoController.addVideo)
+router.get('addVideo/:code/:name/:date/:actress/:category/:series', videoController.addVideo)
 
 router.get('addActressToVideo/:id/:actress', videoController.addActressToVideo);
 

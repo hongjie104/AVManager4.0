@@ -12,12 +12,16 @@ package com.avManager
 		{
 		}
 		
+		private static function myEncodeURIComponent(str:String):String{
+			return encodeURIComponent(str.replace(/%/g, '*').replace(/\//g, '^'));
+		}
+		
 		private static function getLocalServer():String{
 			return Config.instance.localServer;
 		}
 		
 		public static function getVideo(startIndex:int, count:int, sortType:int = 1, desired:Boolean = false, keyWord:String = "!"):String {
-			return getLocalServer() + "/getVideo/" + MathUtil.max(0, startIndex) + "/" + MathUtil.max(0, count) + "/" + sortType + "/" + (desired ? 1 : 0) + "/" + encodeURIComponent(keyWord);
+			return getLocalServer() + "/getVideo/" + MathUtil.max(0, startIndex) + "/" + MathUtil.max(0, count) + "/" + sortType + "/" + (desired ? 1 : 0) + "/" + myEncodeURIComponent(keyWord);
 		}
 		
 		public static function addVideo(code:String, name:String, date:String, actressName:Vector.<String>, category:Vector.<String>, series:String = "undefined"):String{
@@ -25,7 +29,7 @@ package com.avManager
 			if(StringUtil.isNullOrEmpty(actressNameStr)){
 				actressNameStr = "!";
 			}
-			return getLocalServer() + "/addVideo/" + code + "/" + name + "/" + date + "/" + actressNameStr + "/" + category.join("&") + "/" + series;
+			return getLocalServer() + "/addVideo/" + code + "/" + myEncodeURIComponent(name) + "/" + date + "/" + actressNameStr + "/" + category.join("&") + "/" + myEncodeURIComponent(series);
 		}
 		
 		public static function addActressToVideo(videoID:String, actressName:String):String{
@@ -47,7 +51,7 @@ package com.avManager
 		//----------------------actress
 		
 		public static function getActress(startIndex:int, count:int, sortType:int = 1, keyWord:String = "!"):String {
-			return getLocalServer() + "/getActress/" + MathUtil.max(0, startIndex) + "/" + MathUtil.max(0, count) + "/" + sortType + "/" + encodeURIComponent(keyWord);
+			return getLocalServer() + "/getActress/" + MathUtil.max(0, startIndex) + "/" + MathUtil.max(0, count) + "/" + sortType + "/" + myEncodeURIComponent(keyWord);
 		}
 		
 		public static function getActressedByID(ids:Vector.<String>):String{
@@ -59,7 +63,7 @@ package com.avManager
 		}
 		
 		public static function getActressedByName(name:String, startIndex:int, count:int):String{
-			return getLocalServer() + "/getActressedByName/" + encodeURIComponent(name) + "/" + startIndex + "/" + count;
+			return getLocalServer() + "/getActressedByName/" + myEncodeURIComponent(name) + "/" + startIndex + "/" + count;
 		}
 		
 		public static function getActresVideo(actressID:String, sortType:int, startIndex:int, count:int):String{
@@ -74,7 +78,7 @@ package com.avManager
 			var arr:Array = birthdayStr.split('-');
 			arr[1] = int(arr[1]) - 1;
 			birthdayStr = arr.join('-');
-			return getLocalServer() + "/modifyActress/" + id + "/" + encodeURIComponent(alias) + "/" + birthdayStr + "/" + height + "/" + bust + "/" + waist + "/" + hip + "/" + cup + "/" + score;
+			return getLocalServer() + "/modifyActress/" + id + "/" + myEncodeURIComponent(alias) + "/" + birthdayStr + "/" + height + "/" + bust + "/" + waist + "/" + hip + "/" + cup + "/" + score;
 		}
 		
 		public static function getLastestActressJavBusNum():String{

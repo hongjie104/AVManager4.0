@@ -68,6 +68,7 @@
 			
 			private function fetchPageHtml():void{
 				_textArea.appendText("开始获取第" + _curPage + "页数据\n");
+				reset();
 				var r:URLRequest = new URLRequest(Config.instance.webURL + "/page/" + _curPage);
 				r.requestHeaders = new Array(new URLRequestHeader("Cookie", "existmag=all"));
 				r.manageCookies = false;
@@ -104,8 +105,14 @@
 						_toFetchVideoList.splice(i, 1);
 					}
 				}
-				_textArea.appendText("需要获取的车牌号:" + codeArr.join(",") + "\n");
-				loadImgs();
+				if(_toFetchVideoList.length == 0) {
+					_textArea.appendText("本页没有需要获取的车牌号，进入下一页\n");
+					_curPage++;
+					this.fetchPageHtml();
+				} else {
+					_textArea.appendText("需要获取的车牌号:" + codeArr.join(",") + "\n");
+					loadImgs();					
+				}
 			}
 			
 			private function loadImgs():void{
@@ -119,6 +126,7 @@
 					_textArea.appendText("开始下载封面图\n");
 					var loader:Loader = new Loader();
 					loader.contentLoaderInfo.addEventListener(Event.COMPLETE, onLoadImgS);
+					loader.contentLoaderInfo.addEventListener(IOErrorEvent.IO_ERROR, onLoadImgError);
 					loader.load(new URLRequest(_curToFetchVideoData.imgSUrl));	
 				}
 			}
@@ -126,10 +134,17 @@
 			private function onLoadImgS(evt:Event):void{
 				var loaderInfo:LoaderInfo = evt.target as LoaderInfo;
 				loaderInfo.removeEventListener(Event.COMPLETE, onLoadImgS);
+				loaderInfo.removeEventListener(IOErrorEvent.IO_ERROR, onLoadImgError);
 				
 				if(saveImg(loaderInfo.loader, false)){
 					fetchVideoHtml();
 				}
+			}
+			
+			private function onLoadImgError(evt:IOErrorEvent):void{
+				var loaderInfo:LoaderInfo = evt.target as LoaderInfo;
+				loaderInfo.removeEventListener(IOErrorEvent.IO_ERROR, onLoadImgError);
+				Alert.show(evt.text, "错误");
 			}
 			
 			private function fetchVideoHtml():void{
@@ -147,12 +162,14 @@
 				_textArea.appendText("开始下载大图\n");
 				var loader:Loader = new Loader();
 				loader.contentLoaderInfo.addEventListener(Event.COMPLETE, onLoadImgB);
+				loader.contentLoaderInfo.addEventListener(IOErrorEvent.IO_ERROR, onLoadImgError);
 				loader.load(new URLRequest(_curToFetchVideoData.html.match(/<a class="bigImage" href=".*"><img/)[0].toString().replace('<a class="bigImage" href="', '').replace('"><img', '')));
 			}
 			
 			private function onLoadImgB(evt:Event):void{
 				var loaderInfo:LoaderInfo = evt.target as LoaderInfo;
 				loaderInfo.removeEventListener(Event.COMPLETE, onLoadImgB);
+				loaderInfo.removeEventListener(IOErrorEvent.IO_ERROR, onLoadImgError);
 				
 				if(saveImg(loaderInfo.loader, true)){
 					_textArea.appendText("开始提取数据并写入数据库\n");
@@ -175,7 +192,7 @@
 				var bmd:BitmapData = new BitmapData(loader.contentLoaderInfo.width, loader.contentLoaderInfo.height);
 				bmd.draw(loader);
 				
-				var encoder:JPGEncoder = new JPGEncoder(60);
+				var encoder:JPGEncoder = new JPGEncoder(80);
 				try{
 					var fl:File = new File(Config.getVideoPath()[0] + File.separator + _curToFetchVideoData.code + File.separator + _curToFetchVideoData.code + (isBig ? "l.jpg" : "s.jpg"));
 					if(!fl.exists){

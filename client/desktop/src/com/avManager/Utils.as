@@ -50,7 +50,7 @@ package com.avManager
 			var actress:Vector.<String> = new Vector.<String>();
 			arr = html.match(/<span class="genre" onmouseover.*\r*\n*\s*<a href=.*<\/a>/g);
 			for each(s in arr){
-				actress.push(s.replace(/<span class="genre" onmouseover.*\r*\n*\s*<a href=.*">/, "").replace("</a>", ""));
+				actress.push(s.replace(/<span class="genre" onmouseover.*\r*\n*\s*<a href=.*">/, "").replace("</a>", "").split('（')[0]);
 			}
 			return {
 				code: code,
