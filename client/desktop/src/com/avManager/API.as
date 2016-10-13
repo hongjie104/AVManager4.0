@@ -29,7 +29,8 @@ package com.avManager
 			if(StringUtil.isNullOrEmpty(actressNameStr)){
 				actressNameStr = "!";
 			}
-			return getLocalServer() + "/addVideo/" + code + "/" + myEncodeURIComponent(name) + "/" + date + "/" + actressNameStr + "/" + category.join("&") + "/" + myEncodeURIComponent(series);
+			var categoryStr:String = category.length > 0 ? category.join('&') : "!";
+			return getLocalServer() + "/addVideo/" + code + "/" + myEncodeURIComponent(name) + "/" + date + "/" + actressNameStr + "/" + categoryStr + "/" + myEncodeURIComponent(series);
 		}
 		
 		public static function addActressToVideo(videoID:String, actressName:String):String{
@@ -112,6 +113,12 @@ package com.avManager
 		
 		public static function getSeriesByID(id:String):String{
 			return getLocalServer() + "/getSeriesByID/" + id; 
+		}
+		
+		//----------------------DMM
+		
+		public static function addRank(date:int, rankData:String):String{
+			return getLocalServer() + '/addRank/' + date + "/" + rankData;
 		}
 	}
 }

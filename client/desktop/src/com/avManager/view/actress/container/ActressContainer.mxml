@@ -117,11 +117,12 @@
 		<s:HGroup width="50%" height="100%" paddingLeft="6" verticalAlign="middle">
 			<s:TextInput id="_codeInput"/>
 			<s:Button label="搜索女司机" click="onSearch(event)"/>
-			<s:ComboBox id="_sortTypeComboBox" width="86" change="onSortTypeComboBoxChanged(event)"
+			<s:ComboBox id="_sortTypeComboBox" width="100" change="onSortTypeComboBoxChanged(event)"
 						initialize="_sortTypeComboBox.textInput.editable=false" selectedIndex="0">
 				<s:ArrayCollection>
 					<fx:String>按评分降序</fx:String>
 					<fx:String>按评分升序</fx:String>
+					<fx:String>按DMM评分降序</fx:String>
 					<fx:String>按身高降序</fx:String>
 					<fx:String>按身高升序</fx:String>
 					<fx:String>按生日降序</fx:String>

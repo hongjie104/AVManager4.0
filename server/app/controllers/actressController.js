@@ -32,15 +32,18 @@ exports.getActress = function *() {
 		// 按照评分排序从小到大排序
 		sortCondition.score = 1;
 	} else if (sortType === 3) {
+		// 按照DMM评分降序
+		sortCondition.dmmScore = -1;
+	} else if (sortType === 4) {
 		// 按照身高排序从大到小排序
 		sortCondition.height = -1;
-	} else if (sortType === 4) {
+	} else if (sortType === 5) {
 		// 按照身高排序从小到大排序
 		sortCondition.height = 1;
-	} else if (sortType === 5) {
+	} else if (sortType === 6) {
 		// 按照生日排序从大到小排序
 		sortCondition.birthday = -1;
-	} else if (sortType === 6) {
+	} else if (sortType === 7) {
 		// 按照生日排序从小到大排序
 		sortCondition.birthday = 1;
 	}

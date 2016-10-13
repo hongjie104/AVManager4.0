@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			   xmlns:s="library://ns.adobe.com/flex/spark" 
+			   xmlns:mx="library://ns.adobe.com/flex/mx" width="400" height="300" close="onClose(event)" creationComplete="onCreationCompleted(event)">
+	
+	<fx:Script>
+		<![CDATA[
+			import com.avManager.API;
+			import com.avManager.Net;
+			import com.avManager.model.Config;
+			
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			
+			import org.libra.flex.utils.PopUpUtil;
+			
+			private var _loader:URLLoader;
+			
+			private var _curPage:int = 1;
+			
+			protected function onClose(event:CloseEvent):void
+			{
+				_loader.removeEventListener(Event.COMPLETE, onLoaded);
+				_loader.removeEventListener(IOErrorEvent.IO_ERROR, onLoadError);
+				PopUpUtil.instance.removePopUp(this, 1);
+			}
+			
+			protected function onFetchRankData(event:MouseEvent):void
+			{
+				_loader.load(new URLRequest("http://www.dmm.co.jp/digital/videoa/-/ranking/=/term=monthly/type=actress/page=" + _curPage));
+			}
+			
+			protected function onCreationCompleted(event:FlexEvent):void
+			{
+				_loader = new URLLoader();
+				_loader.addEventListener(Event.COMPLETE, onLoaded);
+				_loader.addEventListener(IOErrorEvent.IO_ERROR, onLoadError);
+			}
+			
+			private function onLoaded(evt:Event):void{
+				var html:String = _loader.data;
+				var arr:Array = html.match(/<span class="rank".*/g);
+				
+				var rankData:String = "";
+				for each(var str:String in arr) {
+					// <span class="rank">1</span><a href="/digital/videoa/-/list/=/article=actress/id=1034355/"><img src="http://pics.dmm.co.jp/mono/actjpgs/medium/takahasi_syouko.jpg" width="100" height="100"  alt="高橋しょう子"></a>
+					if(rankData != "") rankData += "&";
+					rankData += str.match(/"rank">\d+</)[0].toString().replace('"rank">', '').replace('<', '');
+					rankData += ":" + str.match(/alt=.*"/).toString().replace('alt=', '').replace(/"/g, '').split('（')[0];
+				}
+				
+				var date:Date = new Date();
+				var dateInt:int = date.fullYear * 100 + (date.month + 1);
+				Net.instance.fetch(API.addRank(dateInt, rankData), onAddRank);
+			}
+			
+			private function onAddRank(result:String):void{
+				if(++_curPage > 5) {
+					Alert.show("好了");
+				} else {
+					onFetchRankData(null);
+				}
+			}
+			
+			private function onLoadError(evt:IOErrorEvent):void{
+				
+			}
+			
+		]]>
+	</fx:Script>
+<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	<s:Button label="获取排名" click="onFetchRankData(event)"/>
+</s:TitleWindow>

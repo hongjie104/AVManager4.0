@@ -18,7 +18,9 @@ let userSchema = new mongoose.Schema({
 	cup: {type: String, default: "X"},
 	score: {type: Number, default: 0},
 	javBusCode: {type: String, require: true},
-	javBusNum: {type: Number, default: 0}
+	javBusNum: {type: Number, default: 0},
+	// dmm排名得分，第一名是100分，第一百名是1分
+	dmmScore: {type: Number, default: 0}
 }, {collection: "actress"});
 
 // /**
