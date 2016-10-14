@@ -41,18 +41,21 @@
 			private function onLoaded(evt:Event):void{
 				var html:String = _loader.data;
 				var arr:Array = html.match(/<span class="rank".*/g);
-				
-				var rankData:String = "";
-				for each(var str:String in arr) {
-					// <span class="rank">1</span><a href="/digital/videoa/-/list/=/article=actress/id=1034355/"><img src="http://pics.dmm.co.jp/mono/actjpgs/medium/takahasi_syouko.jpg" width="100" height="100"  alt="高橋しょう子"></a>
-					if(rankData != "") rankData += "&";
-					rankData += str.match(/"rank">\d+</)[0].toString().replace('"rank">', '').replace('<', '');
-					rankData += ":" + str.match(/alt=.*"/).toString().replace('alt=', '').replace(/"/g, '').split('（')[0];
+				if(arr.length == 0){
+					Alert.show("访问出错");
+				} else {
+					var rankData:String = "";
+					for each(var str:String in arr) {
+						// <span class="rank">1</span><a href="/digital/videoa/-/list/=/article=actress/id=1034355/"><img src="http://pics.dmm.co.jp/mono/actjpgs/medium/takahasi_syouko.jpg" width="100" height="100"  alt="高橋しょう子"></a>
+						if(rankData != "") rankData += "&";
+						rankData += str.match(/"rank">\d+</)[0].toString().replace('"rank">', '').replace('<', '');
+						rankData += ":" + str.match(/alt=.*"/).toString().replace('alt=', '').replace(/"/g, '').split('（')[0];
+					}
+					
+					var date:Date = new Date();
+					var dateInt:int = date.fullYear * 100 + (date.month + 1);
+					Net.instance.fetch(API.addRank(dateInt, rankData), onAddRank);	
 				}
-				
-				var date:Date = new Date();
-				var dateInt:int = date.fullYear * 100 + (date.month + 1);
-				Net.instance.fetch(API.addRank(dateInt, rankData), onAddRank);
 			}
 			
 			private function onAddRank(result:String):void{
@@ -64,7 +67,7 @@
 			}
 			
 			private function onLoadError(evt:IOErrorEvent):void{
-				
+				Alert.show(evt.text, "错误");
 			}
 			
 		]]>

@@ -112,9 +112,11 @@
 			
 			private function onVideoEvent(evt:com.avManager.events.VideoEvent):void{
 				if(evt.video){
-					var videoDetail:VideoDetail = new VideoDetail();
-					videoDetail.video = evt.video;
-					PopUpUtil.instance.addPopUp(videoDetail, this, true, 1);	
+					if(evt.subType == com.avManager.events.VideoEvent.VIDEO_CLICKED){
+						var videoDetail:VideoDetail = new VideoDetail();
+						videoDetail.video = evt.video;
+						PopUpUtil.instance.addPopUp(videoDetail, this, true, 1);	
+					}
 				}
 			}
 			

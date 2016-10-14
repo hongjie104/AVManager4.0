@@ -9,9 +9,11 @@
 		<![CDATA[
 			import com.avManager.API;
 			import com.avManager.Net;
+			import com.avManager.events.VideoEvent;
 			import com.avManager.model.data.Actress;
 			import com.avManager.view.fetchActressVideo.FetchActressVideo;
 			import com.avManager.view.video.container.VideoCell;
+			import com.avManager.view.video.detail.VideoDetail;
 			
 			import mx.events.CloseEvent;
 			import mx.events.FlexEvent;
@@ -44,6 +46,9 @@
 			}
 
 			private function onCloseHandler(event:CloseEvent = null):void {
+				for(var i:int = 0; i < _container.numElements; i++){
+					_container.getElementAt(i).removeEventListener(com.avManager.events.VideoEvent.VIDEO_EVENT, onVideoClicked);
+				}
 				PopUpUtil.instance.removePopUp(this, 1);
 			}
 			
@@ -90,11 +95,20 @@
 					videoCell = _container.getElementAt(index) as VideoCell;	
 				} else {
 					videoCell = new VideoCell();
+					videoCell.addEventListener(com.avManager.events.VideoEvent.VIDEO_EVENT, onVideoClicked);
 					_container.addElement(videoCell);
 				}
 				
 				if(videoCell){
 					videoCell.video = video;
+				}
+			}
+			
+			private function onVideoClicked(evt:com.avManager.events.VideoEvent):void{
+				if(evt.subType == com.avManager.events.VideoEvent.VIDEO_CLICKED){
+					var videoDetail:VideoDetail = new VideoDetail();
+					videoDetail.video = evt.video;
+					PopUpUtil.instance.addPopUp(videoDetail, this, true, 1);	
 				}
 			}
 			

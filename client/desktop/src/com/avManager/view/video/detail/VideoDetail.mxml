@@ -4,7 +4,7 @@
 			   xmlns:mx="library://ns.adobe.com/flex/mx"
 			   xmlns:video="com.avManager.view.video.*"
 			   xmlns:detail="com.avManager.view.video.detail.*"
-			   width="1200" height="618" close="onCloseHandler(event)"
+			   width="1280" height="800" close="onCloseHandler(event)"
 			   creationComplete="onCreationCompleted(event)" title="车辆详情">
 	<fx:Script>
 		<![CDATA[
@@ -14,6 +14,7 @@
 			import com.avManager.model.data.Actress;
 			import com.avManager.model.data.Video;
 			import com.avManager.view.actress.container.ActressCell;
+			import com.avManager.view.actress.detail.ActressDetail;
 			import com.avManager.view.actress.selector.ActressSelector;
 			
 			import mx.controls.Alert;
@@ -79,6 +80,9 @@
 			}
 			
 			private function onFetchActresses(actresses:Array):void{
+				for(var i:int = 0; i < _actressContainer.numElements; i++){
+					_actressContainer.getElementAt(i).removeEventListener(MouseEvent.CLICK, onActressCellClicked);
+				}
 				_actressContainer.removeAllElements();
 				
 				var actressCell:ActressCell;
@@ -88,10 +92,18 @@
 					actress.createWithJson(actressObj);
 					actressCell = new ActressCell();
 					actressCell.actress = actress;
+					actressCell.addEventListener(MouseEvent.CLICK, onActressCellClicked);
 					_actressContainer.addElement(actressCell);
 				}
 				
 				Net.instance.fetch(API.getCategoryByID(_video.category), this.onFetchCategory);
+			}
+			
+			private function onActressCellClicked(evt:MouseEvent):void{
+				var actressCell:ActressCell = evt.currentTarget as ActressCell;
+				var detail:ActressDetail = new ActressDetail();
+				detail.actress = actressCell.actress;
+				PopUpUtil.instance.addPopUp(detail, this, true, 1);
 			}
 			
 			private function onFetchCategory(categorys:Array):void{
